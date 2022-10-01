@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="khm2">
+
+<link name="FL_wheel_link">
+  <visual>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <geometry>
+      <mesh filename="package://khm2_description/models/wheel.dae"/>
+    </geometry>
+  </visual>
+  <collision>
+    <geometry>
+      <mesh filename="package://khm2_description/models/wheel.dae"/>
+    </geometry>
+  </collision>
+  <inertial>
+    <mass value="0.45"/>
+    <origin xyz="0 0 0"/>
+    <inertia
+	    ixx="3" ixy="3" ixz="3"
+	    iyy="3" iyz="3" izz="3"/>
+  </inertial>
+</link>
+
+
+<link name="FR_wheel_link">
+  <visual>	
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <geometry>
+      <mesh filename="package://khm2_description/models/wheel.dae"/>
+    </geometry>
+  </visual>
+  <collision>
+    <geometry>
+      <mesh filename="package://khm2_description/models/wheel.dae"/>
+    </geometry>
+  </collision>
+  <inertial>
+    <mass value="0.45"/>
+    <origin xyz="0 0 0"/>
+    <inertia
+	    ixx="3" ixy="3" ixz="3"
+	    iyy="3" iyz="3" izz="3"/>
+  </inertial>
+
+</link>
+
+
+<link name="BL_wheel_link">
+  <visual>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <geometry>
+      <mesh filename="package://khm2_description/models/wheel.dae"/>
+    </geometry>
+  </visual>
+  <collision>
+    <geometry>
+      <mesh filename="package://khm2_description/models/wheel.dae"/>
+    </geometry>
+  </collision>
+  <inertial>
+    <mass value="0.45"/>
+    <origin xyz="0 0 0"/>
+    <inertia
+	    ixx="3" ixy="3" ixz="3"
+	    iyy="3" iyz="3" izz="3"/>
+  </inertial>
+
+</link>
+
+
+<link name="BR_wheel_link">
+  <visual>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <geometry>
+      <mesh filename="package://khm2_description/models/wheel.dae"/>
+    </geometry>
+  </visual>
+  <collision>
+    <geometry>
+      <mesh filename="package://khm2_description/models/wheel.dae"/>
+    </geometry>
+  </collision>
+  <inertial>
+    <mass value="0.45"/>
+    <origin xyz="0 0 0"/>
+    <inertia
+	    ixx="3" ixy="3" ixz="3"
+	    iyy="3" iyz="3" izz="3"/>
+  </inertial>
+</link>
+
+<link name="base_link">
+  <visual>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <geometry>
+      <mesh filename="package://khm2_description/models/chassis.dae"/>
+    </geometry>
+  </visual>
+  <collision>
+    <geometry>
+      <box size="0.333 0.16125 0.15428"></box>
+    </geometry>
+  </collision>
+  <inertial>
+	  <mass value="30"/>
+          <inertia ixx="3" ixy="3" ixz="3" iyy="3" iyz="3" izz="3" />
+  </inertial>
+</link>
+
+<joint name="FL_TO_BASELINK" type="continuous">
+	<hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+	<origin xyz="-0.145 0.145225 -0.1" rpy="0 0 0"/>
+	<child link="FL_wheel_link"/>
+	<parent link="base_link"/>
+</joint>
+
+
+<joint name="FR_TO_BASELINK" type="continuous">
+	<hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+	<origin xyz="0.145 0.145225 -0.1" rpy="0 0 0"/>
+	<child link="FR_wheel_link"/>
+	<parent link="base_link"/>
+</joint>
+
+
+<joint name="BL_TO_BASELINK" type="continuous">
+	<hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+	<origin xyz="-0.145 -0.145225 -0.1" rpy="0 0 0"/>
+	<child link="BL_wheel_link"/>
+	<parent link="base_link"/>
+</joint>
+
+
+<joint name="BR_TO_BASELINK" type="continuous">
+	<hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+	<origin xyz="0.145 -0.145225 -0.1" rpy="0 0 0"/>
+	<origin xyz="-0.145 -0.145225 -0.1" rpy="0 0 0"/>
+	<child link="BR_wheel_link"/>
+	<parent link="base_link"/>
+</joint>
+
+<gazebo>
+   <plugin filename="libgazebo_ros_control.so" name="gazebo_ros_control"></plugin>
+</gazebo>
+
+
+  <transmission name="FR_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="motor1">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+    <joint name="FR_TO_BASELINK">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+
+  <transmission name="FL_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="motor2">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+    <joint name="FL_TO_BASELINK">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+
+  <transmission name="BR_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="motor3">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+    <joint name="BR_TO_BASELINK">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+
+  <transmission name="BL_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="motor4">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+    <joint name="BL_TO_BASELINK">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+
+</robot>

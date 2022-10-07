@@ -1,6 +1,5 @@
 <launch>
 
-<include file="$(find khm2_description)/launch/khm2_description.launch"/>
 <include file="$(find khm2_gazebo)/launch/khm2_gazebo.launch"/>
 
 </launch>

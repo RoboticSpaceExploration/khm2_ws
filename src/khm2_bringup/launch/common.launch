@@ -1,0 +1,6 @@
+<launch>
+
+<include file="$(find khm2_description)/launch/khm2_description.launch"/>
+<include file="$(find khm2_control)/launch/khm2_control.launch"/>
+
+</launch>

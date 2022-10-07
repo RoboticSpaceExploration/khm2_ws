@@ -1,0 +1,18 @@
+<launch>
+
+<arg name="ramp_slope" value="0.05236"/>
+
+<arg name="x" value="0"/>
+<arg name="y" value="-1.0"/>
+<arg name="z" value="0.147952207"/>
+<arg name="rr" value="0.05236"/>
+<arg name="rp" value="0"/>
+<arg name="ry" value="0"/>
+
+<include file="$(find khm2_bringup)/launch/common.launch"/>
+
+<node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+args="-urdf -model khm2 -param robot_description -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg rr) -P $(arg rp) -Y $(arg ry)" />
+
+
+</launch>

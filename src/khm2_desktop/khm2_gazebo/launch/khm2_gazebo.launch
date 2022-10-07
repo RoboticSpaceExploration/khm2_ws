@@ -1,10 +1,12 @@
 <launch>
 
-<node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
-args="-urdf -model khm2 -param robot_description"/>
+<!--<node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+args="-urdf -model khm2 -param robot_description -x 0 -y 0 -z 0.2" />
+-->
 
 <include file="$(find gazebo_ros)/launch/empty_world.launch">
-  <arg name="paused" value="false"/>
+  <arg name="world_name" value="$(find khm2_gazebo)/worlds/soft_soil.world"/>
+  <arg name="paused" value="true"/>
   <arg name="use_sim_time" value="true"/>
   <arg name="gui" value="true"/>
   <arg name="recording" value="false"/>

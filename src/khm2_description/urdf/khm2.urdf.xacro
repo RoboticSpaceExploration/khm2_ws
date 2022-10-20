@@ -6,20 +6,19 @@
   <visual>
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <geometry>
-      <mesh filename="package://khm2_description/models/wheel.dae"/>
+      <mesh filename="package://khm2_description/models/wheel.stl"/>
     </geometry>
   </visual>
   <collision>
     <geometry>
-      <mesh filename="package://khm2_description/models/wheel.dae"/>
+      <mesh filename="package://khm2_description/models/wheel_col.dae"/>
     </geometry>
   </collision>
   <inertial>
-    <mass value="0.45"/>
+    <mass value="0.06925"/>
     <origin xyz="0 0 0"/>
-    <inertia
-	    ixx="0.003" ixy="0" ixz="0"
-	    iyy="0.003" iyz="0" izz="0.003"/>
+    <xacro:cylinder_inertia m="0.06925" r="0.112" h="0.127"/> 
+
   </inertial>
 </link>
 
@@ -28,20 +27,19 @@
   <visual>	
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <geometry>
-      <mesh filename="package://khm2_description/models/wheel.dae"/>
+      <mesh filename="package://khm2_description/models/wheel.stl"/>
     </geometry>
   </visual>
   <collision>
     <geometry>
-      <mesh filename="package://khm2_description/models/wheel.dae"/>
+      <mesh filename="package://khm2_description/models/wheel_col.dae"/>
     </geometry>
   </collision>
   <inertial>
-    <mass value="0.45"/>
+    <mass value="0.06925"/>
     <origin xyz="0 0 0"/>
-    <inertia
-	    ixx="0.003" ixy="0" ixz="0"
-	    iyy="0.003" iyz="0" izz="0.003"/>
+    <xacro:cylinder_inertia m="0.06925" r="0.112" h="0.127"/> 
+
   </inertial>
 
 </link>
@@ -51,20 +49,19 @@
   <visual>
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <geometry>
-      <mesh filename="package://khm2_description/models/wheel.dae"/>
+      <mesh filename="package://khm2_description/models/wheel.stl"/>
     </geometry>
   </visual>
   <collision>
     <geometry>
-      <mesh filename="package://khm2_description/models/wheel.dae"/>
+      <mesh filename="package://khm2_description/models/wheel_col.dae"/>
     </geometry>
   </collision>
   <inertial>
-    <mass value="0.45"/>
+    <mass value="0.06925"/>
     <origin xyz="0 0 0"/>
-    <inertia
-	    ixx="0.003" ixy="0" ixz="0"
-	    iyy="0.003" iyz="0" izz="0.003"/>
+    <xacro:cylinder_inertia m="0.06925" r="0.112" h="0.127"/> 
+
   </inertial>
 
 </link>
@@ -74,20 +71,18 @@
   <visual>
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <geometry>
-      <mesh filename="package://khm2_description/models/wheel.dae"/>
+      <mesh filename="package://khm2_description/models/wheel.stl"/>
     </geometry>
   </visual>
   <collision>
     <geometry>
-      <mesh filename="package://khm2_description/models/wheel.dae"/>
+      <mesh filename="package://khm2_description/models/wheel_col.dae"/>
     </geometry>
   </collision>
   <inertial>
-    <mass value="0.45"/>
+    <mass value="0.06925"/>
     <origin xyz="0 0 0"/>
-    <inertia
-	    ixx="0.003" ixy="0" ixz="0"
-	    iyy="0.003" iyz="0" izz="0.003"/>
+    <xacro:cylinder_inertia m="0.06925" r="0.112" h="0.127"/> 
   </inertial>
 </link>
 
@@ -104,8 +99,8 @@
     </geometry>
   </collision>
   <inertial>
-      <mass value="3.0"/>
-      <xacro:box_inertia m="3.0" x="0.333" y="0.16125" z="0.15428"/>        
+      <mass value="2.0"/>
+      <xacro:box_inertia m="2.0" x="0.333" y="0.16125" z="0.15428"/>        
   </inertial>
 </link>
 
@@ -143,6 +138,16 @@
 
 <gazebo>
    <plugin filename="libgazebo_ros_control.so" name="gazebo_ros_control"></plugin>
+   <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
+    <alwaysOn>true</alwaysOn>
+    <updateRate>50.0</updateRate>
+    <bodyName>base_link</bodyName>
+    <topicName>odom</topicName>
+    <gaussianNoise>0</gaussianNoise>
+    <frameName>world</frameName>
+    <xyzOffsets>0 0 0</xyzOffsets>
+    <rpyOffsets>0 0 0</rpyOffsets>
+  </plugin>  
 </gazebo>
 
 

@@ -1,5 +1,5 @@
 <?xml version='1.0'?>
-<sdf version='1.7'>	
+<sdf version='1.7'> 
   <world name='empty'>
     <plugin name='hina_physics' filename='src/hina_ssi_physics/libhina_ssi_plugin_physics.so'>
         <width_x></width_x>
@@ -52,6 +52,60 @@
       </link>
       <pose>0.252724 -0.228037 0 0 -0 0</pose>
     </model>
+    <model name='unit_box'>
+      <static>1</static>
+      <pose>0 -1.26791 0.174955 0 -0 0</pose>
+      <link name='link'>
+        <inertial>
+          <mass>1</mass>
+          <inertia>
+            <ixx>0.166667</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.166667</iyy>
+            <iyz>0</iyz>
+            <izz>0.166667</izz>
+          </inertia>
+          <pose>0 0 0 0 -0 0</pose>
+        </inertial>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>2 0.1 1</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>2 0.1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <name>Gazebo/Grey</name>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+            </script>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+    </model> 
     <state world_name='empty'>
       <sim_time>158 460000000</sim_time>
       <real_time>28 466482100</real_time>

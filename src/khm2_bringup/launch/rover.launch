@@ -1,11 +1,10 @@
 <launch>
 
-<arg name="ramp_slope" value="0.05236"/>
 
 <arg name="x" value="0"/>
 <arg name="y" value="-1.0"/>
-<arg name="z" value="0.147952207"/>
-<arg name="rr" value="0.05236"/>
+<arg name="z" value="0.04161555968"/>
+<arg name="rr" value="0.1570796327"/>
 <arg name="rp" value="0"/>
 <arg name="ry" value="0"/>
 

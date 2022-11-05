@@ -3,8 +3,8 @@
 
 <arg name="x" value="0"/>
 <arg name="y" value="-1.0"/>
-<arg name="z" value="0.04161555968"/>
-<arg name="rr" value="0.1570796327"/>
+<arg name="z" value="0.23"/>
+<arg name="rr" value="0"/>
 <arg name="rp" value="0"/>
 <arg name="ry" value="0"/>
 

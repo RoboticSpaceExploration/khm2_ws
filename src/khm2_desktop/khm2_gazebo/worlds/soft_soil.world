@@ -6,6 +6,12 @@
         <width_y>500</width_y>
         <scale>0.005</scale>
 	<angle>0</angle>
+	<links>
+	    <link>FR_wheel_link</link>	
+	    <link>BR_wheel_link</link>
+	    <link>FL_wheel_link</link>
+	    <link>BL_wheel_link</link>
+	</links>
     </plugin>
     <gravity>0 0 -9.8</gravity>
     <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>

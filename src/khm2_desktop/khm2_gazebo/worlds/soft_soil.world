@@ -1,11 +1,13 @@
 <?xml version='1.0'?>
-<sdf version='1.7'> 
+<sdf version='1.6'> 
   <world name='empty'>
     <plugin name='hina_ssi_physics' filename='libhina_ssi_plugin_physics.so'>
-        <width_x>500</width_x>
-        <width_y>500</width_y>
-        <scale>0.005</scale>
-	<angle>0</angle>
+	<col_threads>12</col_threads>
+	<dem>test_dem.csv</dem>
+        <width_x>2</width_x>
+        <width_y>5</width_y>
+        <scale>0.003</scale>
+	<angle>0.0</angle>
 	<links>
 	    <link>FR_wheel_link</link>	
 	    <link>BR_wheel_link</link>
@@ -58,7 +60,6 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    
     <state world_name='empty'>
       <sim_time>158 460000000</sim_time>
       <real_time>28 466482100</real_time>
@@ -74,6 +75,7 @@
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
+      	
       <light name='sun'>
         <pose>2.80879 2.02825 10 0 -0 0</pose>
       </light>

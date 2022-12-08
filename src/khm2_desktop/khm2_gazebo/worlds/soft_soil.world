@@ -3,11 +3,16 @@
   <world name='empty'>
     <plugin name='hina_ssi_physics' filename='libhina_ssi_plugin_physics.so'>
 	<col_threads>12</col_threads>
-	<dem>test_dem.csv</dem>
-        <width_x>2</width_x>
-        <width_y>5</width_y>
-        <scale>0.003</scale>
-	<angle>0.0</angle>
+	<dem>
+		<file>testdem.gtif</file>
+		<upscale_res>100</upscale_res>
+	</dem>
+	<sandbox>
+		<width_x>2</width_x>
+		<width_y>4</width_y>
+		<resolution>0.005</resolution>
+		<angle>0.0</angle>
+	</sandbox>
 	<links>
 	    <link>FR_wheel_link</link>	
 	    <link>BR_wheel_link</link>

@@ -1,0 +1,18 @@
+<launch>
+
+
+<arg name="x" value="0"/>
+<arg name="y" value="0"/>
+<arg name="z" value="0.23"/>
+<arg name="rr" value="0"/>
+<arg name="rp" value="0"/>
+<arg name="ry" value="0"/>
+
+<arg name="rock" default="$(find khm2_description)/urdf/rock.urdf.xacro"/>
+
+<param name="rock_description" command="xacro --inorder $(arg rock)"/>
+
+<node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+args="-urdf -model rock -param rock_description -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg rr) -P $(arg rp) -Y $(arg ry)" />
+
+</launch>

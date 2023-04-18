@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<robot name="rock" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<xacro:include filename="$(find khm2_description)/urdf/macro.xacro"/>
+
+<link name="rock_link">
+  <visual>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <geometry>
+      <mesh filename="package://khm2_description/models/Rock1.dae"/>
+    </geometry>
+  </visual>
+  <collision>
+    <geometry>
+      <mesh filename="package://khm2_description/models/Rock1.dae"/>
+    </geometry>
+  </collision>
+    <inertial>
+    <mass value="1"/>
+    <origin xyz="0 0 0"/>
+    <xacro:box_inertia m="1" x="1" y="1" z="0"/> 
+  </inertial>
+</link>
+
+<gazebo>
+    <static>true</static>
+</gazebo>
+
+</robot>
+

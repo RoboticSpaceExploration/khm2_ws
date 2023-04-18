@@ -1,24 +1,27 @@
 <?xml version='1.0'?>
 <sdf version='1.6'> 
-  <world name='empty'>
+  <world name='soft_soil'>
     <plugin name='hina_ssi_physics' filename='libhina_ssi_plugin_physics.so'>
-	<col_threads>12</col_threads>
-	<dem>
-		<file>testdem.gtif</file>
-		<upscale_res>100</upscale_res>
-	</dem>
-	<sandbox>
-		<width_x>2</width_x>
-		<width_y>4</width_y>
-		<resolution>0.005</resolution>
-		<angle>0.0</angle>
-	</sandbox>
-	<links>
-	    <link>FR_wheel_link</link>	
-	    <link>BR_wheel_link</link>
-	    <link>FL_wheel_link</link>
-	    <link>BL_wheel_link</link>
-	</links>
+      <col_threads>5</col_threads>
+      <sandbox>
+        <width_x>2</width_x>
+        <width_y>2</width_y>
+        <resolution>0.005</resolution>
+        <angle>0</angle>
+      </sandbox>
+      <links>
+          <link>FR_wheel_link</link>  
+          <link>BR_wheel_link</link>
+          <link>FL_wheel_link</link>
+          <link>BL_wheel_link</link>
+      </links>
+      <params>
+         <k_phi>8.14e5</k_phi>
+         <k_e>7.8e7</k_e>
+         <c>3.5e3</c> 
+         <phi>0.55</phi>
+         <mfr>0.75</mfr>
+      </params>
     </plugin>
     <gravity>0 0 -9.8</gravity>
     <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
@@ -46,7 +49,7 @@
       <link name='hina_ssi_visual_root_link'>
         <visual name='hina_ssi_visual'>
           <plugin name='hina_ssi_visual_plugin' filename='libhina_ssi_plugin_visual.so'/>
-          <cast_shadows>0</cast_shadows>
+          <cast_shadows>1</cast_shadows>
           <geometry>
             <plane>
               <normal>0 0 1</normal>

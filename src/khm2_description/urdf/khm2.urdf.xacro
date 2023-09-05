@@ -136,6 +136,53 @@
 	<parent link="base_link"/>
 </joint>
 
+<!-- Enable the Joint Feedback -->
+<gazebo reference="FL_TO_BASELINK">
+  <provideFeedback>true</provideFeedback>
+  <sensor name="FL_force_torque" type="force_torque">
+    <update_rate>100</update_rate>
+  </sensor>
+</gazebo>
+<gazebo reference="FR_TO_BASELINK">
+  <provideFeedback>true</provideFeedback>
+  <sensor name="FR_force_torque" type="force_torque">
+    <update_rate>100</update_rate>
+  </sensor>
+</gazebo>
+<gazebo reference="BL_TO_BASELINK">
+  <provideFeedback>true</provideFeedback>
+  <sensor name="BL_force_torque" type="force_torque">
+    <update_rate>100</update_rate>
+  </sensor>
+</gazebo>
+<gazebo reference="BR_TO_BASELINK">
+  <provideFeedback>true</provideFeedback>
+  <sensor name="BR_force_torque" type="force_torque">
+    <update_rate>100</update_rate>
+  </sensor>
+</gazebo>
+<gazebo reference="base_link">
+  <gravity>true</gravity>
+  <sensor name="imu_sensor" type="imu">
+    <always_on>true</always_on>
+    <update_rate>100</update_rate>
+    <visualize>true</visualize>
+    <topic>imu</topic>
+    <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+      <topicName>imu</topicName>
+      <bodyName>base_link</bodyName>
+      <updateRateHZ>100.0</updateRateHZ>
+      <gaussianNoise>0.0</gaussianNoise>
+      <xyzOffset>0 0 0</xyzOffset>
+      <rpyOffset>0 0 0</rpyOffset>
+      <frameName>base_link</frameName>
+      <initialOrientationAsReference>false</initialOrientationAsReference>
+    </plugin>
+    <pose>0 0 0 0 0 0</pose>
+  </sensor>
+</gazebo>
+
+
 <gazebo>
    <plugin filename="libgazebo_ros_control.so" name="gazebo_ros_control"></plugin>
    <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
@@ -148,6 +195,28 @@
     <xyzOffsets>0 0 0</xyzOffsets>
     <rpyOffsets>0 0 0</rpyOffsets>
   </plugin>  
+
+  <!-- Force torque sensors -->
+  <plugin name="FL_TO_BASELINK_ft_sensor" filename="libgazebo_ros_ft_sensor.so">
+    <updateRate>100.0</updateRate>
+    <topicName>front_left_torque</topicName>
+    <jointName>FL_TO_BASELINK</jointName>
+  </plugin>
+  <plugin name="FR_TO_BASELINK_ft_sensor" filename="libgazebo_ros_ft_sensor.so">
+    <updateRate>100.0</updateRate>
+    <topicName>front_right_torque</topicName>
+    <jointName>FR_TO_BASELINK</jointName>
+  </plugin>
+  <plugin name="BL_TO_BASELINK_ft_sensor" filename="libgazebo_ros_ft_sensor.so">
+    <updateRate>100.0</updateRate>
+    <topicName>back_left_torque</topicName>
+    <jointName>BL_TO_BASELINK</jointName>
+  </plugin>
+  <plugin name="BR_TO_BASELINK_ft_sensor" filename="libgazebo_ros_ft_sensor.so">
+    <updateRate>100.0</updateRate>
+    <topicName>back_right_torque</topicName>
+    <jointName>BR_TO_BASELINK</jointName>
+  </plugin>
 </gazebo>
 
 

@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+
+    <node name="rosbag_record_trial_node" pkg="rosbag" type="record" 
+    args="-o $(find khm2_verification_pipeline)/data /joint_states /front_left_torque /front_right_torque /back_left_torque /back_right_torque /imu /robot1_velocity_controller/odom"
+    output="screen"/>
+    
+</launch>

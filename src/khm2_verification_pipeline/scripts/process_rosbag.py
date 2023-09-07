@@ -2,6 +2,7 @@
 import os
 import sys
 import pandas as pd
+import numpy as np
 
 path = None
 if (len(sys.argv) != 2):
@@ -55,13 +56,25 @@ for file in os.listdir(path):
     print(f"compiling csv data")
     csv_path_partial = os.path.join(output_dir_path, file_name_no_ext)
 
-    # model_states: pose AND twist
-    # joint_states: wheel angular velocity
-    # imu: acceleration, gyroscope
-    # torque csvs: torques of each wheel
-    # load the csv
-    state_df = pd.read_csv(csv_path_partial + "_model_states.csv")
+    """
+        Preprocesing goal: merge all data into one clean csv
 
+        model_states: pose AND twist
+        joint_states: wheel angular velocity
+        imu: acceleration, gyroscope
+        torque csvs: torques of each wheel
+        load the csv
+    """
+    state_df = pd.read_csv(csv_path_partial + "_model_states.csv")
+    imu_df = pd.read_csv(csv_path_partial + "_imu.csv")
+    joint_states_df = pd.read_csv(csv_path_partial + "_joint_states.csv")
+    fl_torque_df = pd.read_csv(csv_path_partial + "_front_left_torque.csv")
+    fr_torque_df = pd.read_csv(csv_path_partial + "_front_right_torque.csv")
+    bl_torque_df = pd.read_csv(csv_path_partial + "_back_left_torque.csv")
+    br_torque_df = pd.read_csv(csv_path_partial + "_back_right_torque.csv")
+
+
+    # ============= model_states csv needs special processing ===============
     # find the index of the rover
     rover_idx = 0
     for col in state_df.columns:
@@ -88,6 +101,105 @@ for file in os.listdir(path):
         s = col.split('.')
         renamed_cols.append(f"{s[1][:-1]}.{'.'.join(s[2:])}")
     state_df.columns = renamed_cols
-        
+    # ============== model_states csv ===================
+
+    # ============== clean joint_states csv ==============
+    for col in joint_states_df.columns:
+        if "effort" in col:
+            del joint_states_df[col]
+    # ============== clean joint_states csv ==============
+
+    def delete_field_from_col(df: pd.DataFrame):
+        renamed_cols = []
+        for col in df.columns:
+            if "time" in col:
+                renamed_cols.append(col)
+                continue
+            renamed_cols.append('.'.join(col.split('.')[1:])) # delete "field" part at start
+        df.columns = renamed_cols
+    delete_field_from_col(imu_df)
+    delete_field_from_col(joint_states_df)
+    delete_field_from_col(fl_torque_df)
+    delete_field_from_col(fr_torque_df)
+    delete_field_from_col(bl_torque_df)
+    delete_field_from_col(br_torque_df)
+
+    # ============== clean wheel torque dataframes ==============
+    def clean_torque_dataframes(d: pd.DataFrame, prepend_val):
+        renamed_cols = []
+        for col in d.columns:
+            if "time" in col:
+                renamed_cols.append(col)
+            else:
+                renamed_cols.append(prepend_val + col)
+        d.columns = renamed_cols
+    clean_torque_dataframes(fl_torque_df, "fl.")
+    clean_torque_dataframes(fr_torque_df, "fr.")
+    clean_torque_dataframes(bl_torque_df, "bl.")
+    clean_torque_dataframes(br_torque_df, "br.")
+    # ============== clean wheel torque dataframes ==============
+
+    # ============== clean joint state dataframes ==============
+    # 2 = front left, 3 = front right, 0 = back left, 1 = back right
+    # print(joint_states_df["name2"][0]) # front left
+    # print(joint_states_df["name3"][0]) # front right
+    # print(joint_states_df["name0"][0]) # back left
+    # print(joint_states_df["name1"][0]) # back right
+    new_joint_states_df = pd.DataFrame()
+    joint_states_df["front_left_velocity"] = joint_states_df["velocity2"]
+    joint_states_df["front_right_velocity"] = joint_states_df["velocity3"]
+    joint_states_df["back_left_velocity"] = joint_states_df["velocity0"]
+    joint_states_df["back_right_velocity"] = joint_states_df["velocity1"]
+    del joint_states_df["velocity0"]
+    del joint_states_df["velocity1"]
+    del joint_states_df["velocity2"]
+    del joint_states_df["velocity3"]
+    del joint_states_df["name0"]
+    del joint_states_df["name1"]
+    del joint_states_df["name2"]
+    del joint_states_df["name3"]
+    # ============== clean joint state dataframes ==============
+
     print(state_df.columns)
+    print(imu_df.columns)
+    print(joint_states_df.columns)
+    print(fl_torque_df.columns)
+    all_dfs = [state_df, imu_df, joint_states_df, fl_torque_df, fr_torque_df, bl_torque_df, br_torque_df]
+
+    # ============= convert time from nanoseconds to seconds ===============
+    for d in all_dfs:
+        d["%time"] = d["%time"].map(lambda x: x / 1_000_000_000)
+        new_times = []
+        start = d["%time"][0] # use to offset each time
+        prev = 0
+        for time in d["%time"]:
+            new_times.append(time - start)
+        d["%time"] = new_times
+    # ============= convert time from nanoseconds to seconds ===============
+
+    df = pd.concat([state_df, imu_df, joint_states_df, fl_torque_df, fr_torque_df, bl_torque_df, br_torque_df], axis=1, join='inner')
+    df_names = ["model_states", "imu", "joint_states", "fl_torque", "fr_torque", "bl_torque", "br_torque"]
+
+    avg_hz = []
+    for d in all_dfs:
+        points = []
+        first = d["%time"][0]
+        prev = 0
+        for i, time in enumerate(d["%time"]):
+            time -= first
+            if i != 0:
+                points.append((time) - prev)
+            else:
+                points.append(time)
+            prev = time
+        avg_hz.append(1000 / (np.mean(points) * 1000)) # convert Hz, msgs per sec
+    for i, t in enumerate(avg_hz):
+        if abs(t - 1000) > 3:
+            print(f"Warning: {df_names[i]} has average sample rate of {t} Hz. Ideally expecting about 1000Hz")
+    # print(avg_hz)
+
+    # ======== done cleaning dataframes =========
+    
+    
+    
 

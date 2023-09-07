@@ -3,9 +3,12 @@ import rospy
 from geometry_msgs.msg import Twist
 import roslaunch
 
+# TODO think about "resetting the rover"
+
+# launch rosbag record and close when node is done with trial
 rosbag_pkg = 'rosbag'
 rosbag_exe = 'record'
-rosbag_node = roslaunch.core.Node(rosbag_pkg, rosbag_exe, args="-o $(find khm2_verification_pipeline)/bags/sim /joint_states /front_left_torque /front_right_torque /back_left_torque /back_right_torque /imu /gazebo/model_states", output="screen")
+rosbag_node = roslaunch.core.Node(rosbag_pkg, rosbag_exe, args="-o $(find khm2_verification_pipeline)/data/sim /joint_states /front_left_torque /front_right_torque /back_left_torque /back_right_torque /imu /gazebo/model_states", output="screen")
 
 launch = roslaunch.scriptapi.ROSLaunch()
 launch.start()
@@ -19,9 +22,9 @@ def shutdown_node(event):
 def main():
     rospy.init_node('run_trial_node')
     # read trial parameters
-    time = rospy.get_param('/trial_params/time', None)
+    time = rospy.get_param('/trial_params/time', None) # s
     speed = rospy.get_param('/trial_params/speed', None) # cm/s
-    angle = rospy.get_param('/trial_params/angle', None)
+    angle = rospy.get_param('/trial_params/angle', None) # degrees
     if time == None:
         rospy.set_param('/trial_params/time', 15)
         time = 15

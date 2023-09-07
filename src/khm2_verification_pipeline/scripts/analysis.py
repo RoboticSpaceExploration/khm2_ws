@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
-import pandas as pd
 import pickle
 import matplotlib.pyplot as plt
-
-
+import math
 
 class data:
     def __init__(self, vicon_time_cut, position_x_cut, position_y_cut, position_z_cut,
@@ -37,7 +35,7 @@ class data:
         self.motor_current_4_cut = motor_current_4_cut
         
 path = "/home/roselab/Desktop/cut_data"
-file = "25DEG1_cut7_refined.p"
+file = "25DEG1_cut2_refined.p"
 with open(path + "/" + f"{file}", "rb") as f:
     mydata = pickle.load(f)
     
@@ -65,19 +63,31 @@ motor_current_2_cut = mydata.motor_current_2_cut
 motor_current_3_cut = mydata.motor_current_3_cut
 motor_current_4_cut = mydata.motor_current_4_cut
 
+motor_vel_1_cut = [(rpm / 850 / 60) * 2 * math.pi * 0.075 for rpm in motor_rpm_1_cut]
+motor_vel_2_cut = [(rpm / 850 / 60) * 2 * math.pi * 0.075 for rpm in motor_rpm_2_cut]
+motor_vel_3_cut = [(rpm / 850 / 60) * 2 * math.pi * 0.075 for rpm in motor_rpm_3_cut]
+motor_vel_4_cut = [(rpm / 850 / 60) * 2 * math.pi * 0.075 for rpm in motor_rpm_4_cut]
+
 fig = plt.figure(figsize=(40,20))
 ax1 = fig.add_subplot(3,1,1)
 ax1.plot(rover_time_cut, position_x_cut, label= 'x')
 plt.xlabel('time [sec]')
 plt.ylabel('x position [m]')
+
 ax2 = fig.add_subplot(3,1,2)
 ax2.plot(rover_time_cut, position_y_cut, label= 'y')
 plt.xlabel('time [sec]')
 plt.ylabel('y position [m]')
+
 ax3 = fig.add_subplot(3,1,3)
 ax3.plot(rover_time_cut, position_z_cut, label= 'y')
 plt.xlabel('time [sec]')
 plt.ylabel('z position [m]')
-fig.suptitle(f'position cut for {file}')
-plt.show()
 
+ax4 = fig.add_subplot(3,1,3)
+ax4.plot(rover_time_cut, motor_rpm_1_cut, label= 'y')
+plt.xlabel('time [sec]')
+plt.ylabel('motor rpm [rotations/min]')
+
+fig.suptitle(f'position cut for {file}')
+# plt.show()

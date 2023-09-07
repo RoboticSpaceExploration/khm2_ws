@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- call nodes that load gazebo, rover, and soil based on trial config -->
+    <!-- load trial parameters -->
+    <rosparam command="load" file="$(find khm2_verification_pipeline)/config/trial_params.yaml"/>
+    <include file="$(find khm2_bringup)/launch/simulation.launch"/>
+    <include file="$(find khm2_bringup)/launch/rover.launch"/>
+
+
+</launch>

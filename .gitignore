@@ -1,2 +1,4 @@
 build
 devel
+src/khm2_verification_pipeline/bags/*
+src/rosbag_to_csv

@@ -4,8 +4,8 @@
     <plugin name='hina_ssi_physics' filename='libhina_ssi_plugin_physics.so'>
       <col_threads>5</col_threads>
       <sandbox>
-        <width_x>2</width_x>
-        <width_y>2</width_y>
+        <width_x>1</width_x>
+        <width_y>1</width_y>
         <resolution>0.005</resolution>
         <angle>0</angle>
       </sandbox>

@@ -6,12 +6,12 @@
   <visual>
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <geometry>
-      <mesh filename="package://khm2_description/models/wheel.stl"/>
+      <mesh filename="package://khm2_description/models/smooth.stl"/>
     </geometry>
   </visual>
   <collision>
     <geometry>
-      <mesh filename="package://khm2_description/models/wheel_col.dae"/>
+      <mesh filename="package://khm2_description/models/smooth_col.dae"/>
     </geometry>
   </collision>
   <inertial>
@@ -27,12 +27,12 @@
   <visual>	
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <geometry>
-      <mesh filename="package://khm2_description/models/wheel.stl"/>
+      <mesh filename="package://khm2_description/models/smooth.stl"/>
     </geometry>
   </visual>
   <collision>
     <geometry>
-      <mesh filename="package://khm2_description/models/wheel_col.dae"/>
+      <mesh filename="package://khm2_description/models/smooth_col.dae"/>
     </geometry>
   </collision>
   <inertial>
@@ -49,12 +49,12 @@
   <visual>
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <geometry>
-      <mesh filename="package://khm2_description/models/wheel.stl"/>
+      <mesh filename="package://khm2_description/models/smooth.stl"/>
     </geometry>
   </visual>
   <collision>
     <geometry>
-      <mesh filename="package://khm2_description/models/wheel_col.dae"/>
+      <mesh filename="package://khm2_description/models/smooth_col.dae"/>
     </geometry>
   </collision>
   <inertial>
@@ -71,12 +71,12 @@
   <visual>
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <geometry>
-      <mesh filename="package://khm2_description/models/wheel.stl"/>
+      <mesh filename="package://khm2_description/models/smooth.stl"/>
     </geometry>
   </visual>
   <collision>
     <geometry>
-      <mesh filename="package://khm2_description/models/wheel_col.dae"/>
+      <mesh filename="package://khm2_description/models/smooth_col.dae"/>
     </geometry>
   </collision>
   <inertial>

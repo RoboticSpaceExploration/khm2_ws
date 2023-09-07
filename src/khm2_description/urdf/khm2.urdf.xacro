@@ -171,7 +171,7 @@
     <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
       <topicName>imu</topicName>
       <bodyName>base_link</bodyName>
-      <updateRateHZ>1000.0</updateRateHZ>
+      <updateRateHZ>1000</updateRateHZ>
       <gaussianNoise>0.0</gaussianNoise>
       <xyzOffset>0 0 0</xyzOffset>
       <rpyOffset>0 0 0</rpyOffset>
@@ -184,7 +184,10 @@
 
 
 <gazebo>
-   <plugin filename="libgazebo_ros_control.so" name="gazebo_ros_control"></plugin>
+   <plugin filename="libgazebo_ros_control.so" name="gazebo_ros_control">
+      <updateRate>1000.0</updateRate>
+      <updateRateHZ>1000.0</updateRateHZ>
+   </plugin>
    <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
     <alwaysOn>true</alwaysOn>
     <updateRate>1000.0</updateRate>

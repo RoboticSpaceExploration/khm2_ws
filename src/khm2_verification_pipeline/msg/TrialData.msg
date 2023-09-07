@@ -1,4 +1,0 @@
-geometry_msgs/WrenchStamped front_left_torque
-geometry_msgs/WrenchStamped front_right_torque
-geometry_msgs/WrenchStamped back_left_torque
-geometry_msgs/WrenchStamped back_right_torque

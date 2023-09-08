@@ -83,7 +83,6 @@ for file in os.listdir(path):
                 break
             else:
                 rover_idx += 1
-    print(rover_idx)
 
     # delete all columns unrelated to the rover's data
     for col in state_df.columns:
@@ -160,21 +159,20 @@ for file in os.listdir(path):
     del joint_states_df["name3"]
     # ============== clean joint state dataframes ==============
 
-    print(state_df.columns)
-    print(imu_df.columns)
-    print(joint_states_df.columns)
-    print(fl_torque_df.columns)
     all_dfs = [state_df, imu_df, joint_states_df, fl_torque_df, fr_torque_df, bl_torque_df, br_torque_df]
 
     # ============= convert time from nanoseconds to seconds ===============
     for d in all_dfs:
-        d["%time"] = d["%time"].map(lambda x: x / 1_000_000_000)
-        new_times = []
-        start = d["%time"][0] # use to offset each time
-        prev = 0
-        for time in d["%time"]:
-            new_times.append(time - start)
-        d["%time"] = new_times
+        for col in d.columns:
+            if "stamp" in col or col == "%time":
+                d[col] = d[col].map(lambda x: x / 1_000_000_000)
+                new_times = []
+                start = d[col][0]
+                for time in d[col]:
+                    new_times.append(time - start)
+                d[col] = new_times
+
+
     # ============= convert time from nanoseconds to seconds ===============
 
     df = pd.concat([state_df, imu_df, joint_states_df, fl_torque_df, fr_torque_df, bl_torque_df, br_torque_df], axis=1, join='inner')
@@ -196,10 +194,32 @@ for file in os.listdir(path):
     for i, t in enumerate(avg_hz):
         if abs(t - 1000) > 3:
             print(f"Warning: {df_names[i]} has average sample rate of {t} Hz. Ideally expecting about 1000Hz")
-    # print(avg_hz)
 
     # ======== done cleaning dataframes =========
-    
-    
-    
+    # print keys of each dataframe
+    def print_df_keys(df: pd.DataFrame):
+        col_width = max(len(word) for word in df.columns) + 2  # padding
+        max_per_col = 3
+        i = 0
+        for col in df.columns:
+            if i == max_per_col:
+                print()
+                i = 0
+            i += 1
+            print(f"{col:{col_width}}", end="")
+        print("\n")
 
+    print(f"========== rover pose and twist ==========")
+    print_df_keys(state_df)
+
+    print(f"========== imu ===========================")
+    print_df_keys(imu_df)
+
+    print(f"========== wheel velocities ==============")
+    print_df_keys(joint_states_df)
+
+    print(f"========== wheel torques ==============")
+    print_df_keys(fl_torque_df)
+    print_df_keys(fr_torque_df)
+    print_df_keys(bl_torque_df)
+    print_df_keys(br_torque_df)

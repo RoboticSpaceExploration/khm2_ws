@@ -2,6 +2,13 @@
 import pickle
 import matplotlib.pyplot as plt
 import math
+import os
+import sys
+import re # regex for parsing file names
+
+path = "/mnt/d/School/College/Rose/verification_pipeline/cut_data"
+if len(sys.argv) == 2:
+    path = os.path.abspath(sys.argv[1])
 
 class data:
     def __init__(self, vicon_time_cut, position_x_cut, position_y_cut, position_z_cut,
@@ -34,7 +41,6 @@ class data:
         self.motor_current_3_cut = motor_current_3_cut
         self.motor_current_4_cut = motor_current_4_cut
         
-path = "/home/roselab/Desktop/cut_data"
 file = "25DEG1_cut2_refined.p"
 with open(path + "/" + f"{file}", "rb") as f:
     mydata = pickle.load(f)
@@ -91,3 +97,13 @@ plt.ylabel('motor rpm [rotations/min]')
 
 fig.suptitle(f'position cut for {file}')
 # plt.show()
+
+# find all the files and sort them by inclination
+files = {}
+for file_name in os.listdir(path):
+    if file_name.endswith(".p"):
+        regex = r"(\d+)DEG" # captures the number before DEG
+        degrees = int(re.findall(regex, file_name)[0]) # take the first group
+        files[file_name] = degrees
+files = dict(sorted(files.items(), key=lambda item: item[1])) # sort them
+print(files)

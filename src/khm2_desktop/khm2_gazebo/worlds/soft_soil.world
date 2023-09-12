@@ -6,7 +6,7 @@
       <sandbox>
         <width_x>1</width_x>
         <width_y>1</width_y>
-        <resolution>0.005</resolution>
+        <resolution>0.01</resolution>
         <angle>0</angle>
       </sandbox>
       <links>
@@ -18,7 +18,7 @@
       <params>
          <k_phi>8.14e5</k_phi>
          <k_e>7.8e7</k_e>
-         <c>3.5e3</c> 
+         <c>3.5e4</c> 
          <phi>0.55</phi>
          <mfr>0.75</mfr>
       </params>
@@ -68,6 +68,29 @@
         <kinematic>0</kinematic>
       </link>
     </model>
+	<model name="frictionless_box">
+	    <static>true</static>  <!-- This makes the box static -->
+    <link name="link">
+      <collision name="collision">
+        <geometry>
+          <box><size>5 5 1</size></box>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>0.0</mu>
+              <mu2>0.0</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <box><size>5 5 1</size></box>
+        </geometry>
+      </visual>
+    </link>
+  </model>
     <state world_name='empty'>
       <sim_time>158 460000000</sim_time>
       <real_time>28 466482100</real_time>

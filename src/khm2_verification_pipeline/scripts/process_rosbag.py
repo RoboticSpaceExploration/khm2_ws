@@ -72,6 +72,7 @@ for file in os.listdir(path):
     cmd5 = f"rostopic echo -b {file_path} -p /front_right_torque > {output_dir_path}/{file_name_no_ext}_front_right_torque.csv"
     cmd6 = f"rostopic echo -b {file_path} -p /back_left_torque > {output_dir_path}/{file_name_no_ext}_back_left_torque.csv"
     cmd7 = f"rostopic echo -b {file_path} -p /back_right_torque > {output_dir_path}/{file_name_no_ext}_back_right_torque.csv"
+    cmd8 = f"rostopic echo -b {file_path} -p /robot1_velocity_controller/odom > {output_dir_path}/{file_name_no_ext}_odom.csv"
     print(f"processing and outputting to csv for {file_name_no_ext}.bag")
     if not os.path.exists(f"{output_dir_path}/{file_name_no_ext}_model_states.csv"):
         os.system(cmd1)
@@ -87,6 +88,8 @@ for file in os.listdir(path):
         os.system(cmd6)
     if not os.path.exists(f"{output_dir_path}/{file_name_no_ext}_back_right_torque.csv"):
         os.system(cmd7)
+    if not os.path.exists(f"{output_dir_path}/{file_name_no_ext}_odom.csv"):
+        os.system(cmd8)
     print(f"done outputting csv")
     print(f"compiling csv data")
     csv_path_partial = os.path.join(output_dir_path, file_name_no_ext)
@@ -103,6 +106,7 @@ for file in os.listdir(path):
     state_df = pd.read_csv(csv_path_partial + "_model_states.csv")
     imu_df = pd.read_csv(csv_path_partial + "_imu.csv")
     joint_states_df = pd.read_csv(csv_path_partial + "_joint_states.csv")
+    odom_df = pd.read_csv(csv_path_partial + "_odom.csv")
     fl_torque_df = pd.read_csv(csv_path_partial + "_front_left_torque.csv")
     fr_torque_df = pd.read_csv(csv_path_partial + "_front_right_torque.csv")
     bl_torque_df = pd.read_csv(csv_path_partial + "_back_left_torque.csv")
@@ -153,6 +157,7 @@ for file in os.listdir(path):
         df.columns = renamed_cols
     delete_field_from_col(imu_df)
     delete_field_from_col(joint_states_df)
+    delete_field_from_col(odom_df)
     delete_field_from_col(fl_torque_df)
     delete_field_from_col(fr_torque_df)
     delete_field_from_col(bl_torque_df)
@@ -174,11 +179,13 @@ for file in os.listdir(path):
     # ============== clean wheel torque dataframes ==============
 
     # ============== clean joint state dataframes ==============
+    """
     # 2 = front left, 3 = front right, 0 = back left, 1 = back right
     # print(joint_states_df["name2"][0]) # front left
     # print(joint_states_df["name3"][0]) # front right
     # print(joint_states_df["name0"][0]) # back left
     # print(joint_states_df["name1"][0]) # back right
+    """
     new_joint_states_df = pd.DataFrame()
     joint_states_df["front_left_velocity"] = joint_states_df["velocity2"]
     joint_states_df["front_right_velocity"] = joint_states_df["velocity3"]
@@ -194,7 +201,7 @@ for file in os.listdir(path):
     del joint_states_df["name3"]
     # ============== clean joint state dataframes ==============
 
-    all_dfs = [state_df, imu_df, joint_states_df, fl_torque_df, fr_torque_df, bl_torque_df, br_torque_df]
+    all_dfs = [state_df, imu_df, joint_states_df, odom_df, fl_torque_df, fr_torque_df, bl_torque_df, br_torque_df]
 
     # ============= convert time from nanoseconds to seconds ===============
     for d in all_dfs:
@@ -210,7 +217,7 @@ for file in os.listdir(path):
 
     # ============= convert time from nanoseconds to seconds ===============
 
-    df = pd.concat([state_df, imu_df, joint_states_df, fl_torque_df, fr_torque_df, bl_torque_df, br_torque_df], axis=1, join='inner')
+    df = pd.concat([state_df, imu_df, joint_states_df, odom_df, fl_torque_df, fr_torque_df, bl_torque_df, br_torque_df], axis=1, join='inner')
     df_names = ["model_states", "imu", "joint_states", "fl_torque", "fr_torque", "bl_torque", "br_torque"]
 
     avg_hz = []

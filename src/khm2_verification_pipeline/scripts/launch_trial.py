@@ -21,7 +21,8 @@ file_name = f"sim_{angle}DEG"
 # launch rosbag record and close when node is done with trial
 rosbag_pkg = 'rosbag'
 rosbag_exe = 'record'
-rosbag_node = roslaunch.core.Node(rosbag_pkg, rosbag_exe, args=f"-o $(find khm2_verification_pipeline)/data/{file_name} /joint_states /front_left_torque /front_right_torque /back_left_torque /back_right_torque /imu /gazebo/model_states", output="screen")
+rosbag_node = roslaunch.core.Node(rosbag_pkg, rosbag_exe, args=f"-o $(find khm2_verification_pipeline)/data/{file_name} /joint_states" +
+                                  " /front_left_torque /front_right_torque /back_left_torque /back_right_torque /imu /gazebo/model_states" "/robot1_velocity_controller/odom", output="screen")
 
 launch = roslaunch.scriptapi.ROSLaunch()
 launch.start()

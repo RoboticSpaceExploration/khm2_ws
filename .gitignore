@@ -1,3 +1,4 @@
 build
 devel
+src/khm2_verification_pipeline/data/*
 src/khm2_verification_pipeline/scripts/__pycache__/

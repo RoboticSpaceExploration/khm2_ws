@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 import rospy
 from geometry_msgs.msg import Twist
+from std_msgs.msg import Float32
+from sensor_msgs.msg import JointState
 import roslaunch
 
+# GLOBAL STATE
 # read trial parameters
+already_reached_steady_state = False
 time = rospy.get_param('/trial_params/time', None) # s
 speed = rospy.get_param('/trial_params/speed', None) # cm/s
 angle = rospy.get_param('/trial_params/angle', None) # degrees
@@ -16,7 +20,10 @@ if speed == None:
 if angle == None:
     rospy.set_param('/trial_params/angle', 0)
     angle = 0
+steady_state_time = rospy.Publisher("/steady_state_time", Float32, queue_size=10)
+joint_state_time = 0
 
+# ===== START ROSLAUNCH SETUP
 file_name = f"sim_{angle}DEG"
 # launch rosbag record and close when node is done with trial
 rosbag_pkg = 'rosbag'
@@ -28,14 +35,27 @@ launch.start()
 
 rosbag_process = launch.launch(rosbag_node)
 rospy.loginfo("started rosbag record node")
+# ====== END ROSLAUNCH SETUP
 
 def shutdown_node(event):
     rospy.signal_shutdown("Trial complete")
 
+def steady_state_timer_callback(timerEvent):
+    steady_state_time.publish(joint_state_time)
+
+def joint_states_callback(msg):
+    joint_state_time = msg.header.stamp.to_sec()
+    if not already_reached_steady_state:
+        if msg.velocity[0] > speed * 0.95 and msg.velocity[1] > speed * 0.95 and msg.velocity[2] > speed * 0.95 and msg.velocity[3] > speed * 0.95:
+            rospy.loginfo("Reached steady state")
+            already_reached_steady_state = True
+            rospy.Timer(rospy.Duration(secs=1), steady_state_timer_callback, oneshot=True)
+
 def main():
     rospy.init_node('run_trial_node')
 
-    cmd_vel_pub = rospy.Publisher("/robot1_velocity_controller/cmd_vel", Twist, queue_size=10)
+    joint_states_sub = rospy.Subscriber("/joint_states", JointState, joint_states_callback)
+    cmd_vel_pub = rospy.Publisher("/robot1_velocity_controller/cmd_vel", Twist, queue_size=100)
 
     timer = rospy.Timer(rospy.Duration(secs=time), shutdown_node)
     rospy.loginfo("Starting trial...")

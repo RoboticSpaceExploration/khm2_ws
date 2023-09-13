@@ -2,10 +2,11 @@
 
 import rospy
 import rospkg
-import roslaunch
 import xml.etree.ElementTree as ET # GO HOME
-import os
-import pickle
+
+# This python script meant to be run before gazebo is launched. Edits the world file
+num = input("Enter the number of degrees to rotate the floor: ")
+print(num)
 
 # set up the world launch file's rotation
 rospy.init_node("set_floor_rotation_node")
@@ -54,56 +55,3 @@ class data:
         self.motor_current_3_cut = motor_current_3_cut
         self.motor_current_4_cut = motor_current_4_cut
 
-# get cadre file to use
-# look in ../data/cut_data folder for all the cadre pickle files
-cadre_files_path = rospack.get_path('khm2_verification_pipeline') + '/data/cut_data'
-cadre_files = None
-# try:
-#     cadre_files = os.listdir(cadre_data_path)
-# except:
-#     rospy.logerr(f"Tried looking for {cadre_data_path}, but it doesn't exist. Make sure the cadre data exists in that folder.")
-#     exit()
-def pretty_print_list(l):
-    col_width = max(len(word) for word in l) + 2  # padding
-    max_per_col = 3
-    i = 0
-    for file in l:
-        if i == max_per_col:
-            print()
-            i = 0
-        i += 1
-        print(f"{file:{col_width}}", end="")
-    print("\n")
-cadre_files = os.listdir(cadre_files_path)
-cadre_files = [file for file in cadre_files if file.endswith(".p") and 'refined' in file]
-pretty_print_list(cadre_files)
-cadre_file_name = input("Choose cadre data trial above to use for this trial.")
-if pickle.load(os.path.join(cadre_files_path + cadre_file_name)) == None:
-    rospy.logerr(f"{os.path.join(cadre_files_path, cadre_file_name)} either doesn't exist or is corrupted.")
-
-rospy.set_param("/trial_params/cadre_trial_file", cadre_file_name)
-
-# parse pickle file for params
-
-rospy.logerr(f"Tried looking for {cadre_files_path}, but it doesn't exist. Make sure the cadre data exists in that folder.")
-exit()
-
-# launch gazebo and spawn rover
-uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
-roslaunch.configure_logging(uuid)
-
-# trial_params_args = ['khm2_verification_pipeline', 'trial_params.launch']
-# trial_params_launch = roslaunch.rlutil.resolve_launch_arguments(trial_params_args)[0]
-# print(trial_params_launch)
-
-sim_args = ['khm2_bringup', 'simulation.launch']
-sim_launch = roslaunch.rlutil.resolve_launch_arguments(sim_args)[0]
-
-rover_args = ['khm2_bringup', 'rover.launch']
-rover_launch = roslaunch.rlutil.resolve_launch_arguments(rover_args)[0]
-
-launch_files = [sim_launch, rover_launch]
-parent = roslaunch.parent.ROSLaunchParent(uuid, launch_files)
-
-parent.start()
-parent.spin()

@@ -7,9 +7,10 @@ import roslaunch
 
 # GLOBAL STATE
 # read trial parameters
-time = rospy.get_param('/trial_params/time', None) # s
-speed = rospy.get_param('/trial_params/speed', None) # cm/s
-angle = rospy.get_param('/trial_params/angle', None) # degrees
+cadre_file_name = rospy.get_param('/trial_params/cadre_file_name', 'no_cadre_file_name')
+time = rospy.get_param('/trial_params/time', 10) # s
+speed = rospy.get_param('/trial_params/speed', 4) # cm/s
+angle = rospy.get_param('/trial_params/angle', 0) # degrees
 if time == None:
     rospy.set_param('/trial_params/time', 15)
     time = 15

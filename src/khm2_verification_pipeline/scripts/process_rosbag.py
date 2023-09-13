@@ -1,21 +1,26 @@
 #!/usr/bin/env python3
+import rospkg
 import os
 import sys
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from tf.transformations import quaternion_matrix, rotation_matrix
+from tf.transformations import quaternion_matrix
 from scipy.spatial.transform import Rotation
 import analysis
 import math
 import warnings
 
+# NOTE: ctrl+f for "adjust" to find all the places where postprocessing was done due to coordinate system misalignments or sign flips
+
 warnings.filterwarnings("ignore", category=UserWarning)
+
+rospack = rospkg.RosPack()
 
 path = None
 if (len(sys.argv) != 2):
     print("Default output directory: khm2_ws/src/khm2_verification_pipeline/data")
-    path = os.path.join(os.path.dirname(__file__),"../data")
+    path = rospack.get_path('khm2_verification_pipeline') + '/data'
     print(path)
     # sys.exit(1)
 elif not os.path.isdir(sys.argv[1]):
@@ -24,6 +29,7 @@ elif not os.path.isdir(sys.argv[1]):
 else:
     path = os.path.abspath(sys.argv[1])
 
+# need this class for pickle, why so big
 class data:
     def __init__(self, vicon_time_cut, position_x_cut, position_y_cut, position_z_cut,
                 rotation_x_cut, rotation_y_cut, rotation_z_cut, rotation_w_cut, 
@@ -283,31 +289,6 @@ def process_robsag(file):
     print_df_keys(br_torque_df)
 
 
-    # import cadre data with 0 degrees
-
-    # Slip vs sinkage 
-    # slip vs angle
-
-    # necessary
-    # RMS error xyz across time
-        # between samples
-        # Useful for? 
-            # represent steady state vs initial condition
-    
-    # nice to have
-    # compare to ishigami's theory
-        # drawbar pull
-    # virtual bevameter?
-        # sinkage pressure curve
-
-    # tonight, traction equations
-    # grouser modeling
-
-    # mock results
-    # 1. cadre initial conditions into sim
-    # 2. sampling rate, run couple tests on titan
-    # 3. analysis: RMS error, angular velocity, position, linear velocity, etc
-
     # RMSE will give idea
     def rmse_position(predictions, targets):
         return np.sqrt(((predictions - targets) ** 2).mean())
@@ -353,6 +334,14 @@ def process_robsag(file):
     # print(np.transpose(np.array([sim_centered_pos_x, sim_centered_pos_y, sim_centered_pos_z, [1 for p in posx_downsampled]]))[30:60])
     # print(np.transpose(np.array([cad_centered_pos_x, cad_centered_pos_y, cad_centered_pos_z, [1 for p in d0.position_x_cut]]))[30:60])
 
+    # rotation data
+    cad_rotation_x = trial.rotation_x_cut
+    cad_rotation_y = trial.rotation_y_cut
+    cad_rotation_z = trial.rotation_z_cut
+    cad_rotation_w = trial.rotation_w_cut
+    # rotate -90 degrees to ADJUST from forward=-y to forward=+x
+    rotation_quaternion_90deg = Rotation.from_euler('xyz', [-np.pi/2, 0, 0], degrees=False).as_quat()
+
     # linear velocity xyz and angular velocity xyz of rover
     sim_vel_x = downsample(rover_time_cut, state_df_time, state_df["twist.linear.x"].to_numpy())
     sim_vel_y = downsample(rover_time_cut, state_df_time, state_df["twist.linear.y"].to_numpy())
@@ -379,7 +368,6 @@ def process_robsag(file):
     sim_lin_vel_local = []
     sim_ang_vel_local = []
     for i, rot in enumerate(sim_rotations):
-        # lin_vel_local.append(np.matmul(np.linalg.inv(rot), np.concatenate((lin_vel_world[i], [1]))))
         sim_lin_vel_local.append(np.dot(np.linalg.inv(rot), np.concatenate((lin_vel_world[i], [1]))))
         sim_ang_vel_local.append(np.dot(np.linalg.inv(rot), np.concatenate((ang_vel_world[i], [1]))))
     # print(lin_vel_world[30:60])
@@ -418,88 +406,6 @@ def process_robsag(file):
     cad_vel_vec = np.array([cad_vel_x, cad_vel_y, cad_vel_z])
 
 
-    ax2 = fig.add_subplot(3,3,3)
-    ax2.plot(rover_time_cut, sim_vel_x, label='velocity_x')
-    ax2 = fig.add_subplot(3,3,3)
-    ax2.plot(rover_time_cut, sim_vel_y, label='velocity_y')
-    ax2 = fig.add_subplot(3,3,3)
-    ax2.plot(rover_time_cut, sim_vel_z, label='velocity_z')
-    plt.xlabel('time [sec]')
-    plt.ylabel('velocity [m/s]')
-    plt.title('velocity [m/s] of Simulated Rover over time [s]')
-    plt.legend()
-    plt.autoscale()
-
-    ax2 = fig.add_subplot(3,3,6)
-    ax2.plot(rover_time_cut, cad_vel_vec[0], label='velocity_x')
-    ax2 = fig.add_subplot(3,3,6)
-    ax2.plot(rover_time_cut, cad_vel_vec[1], label='velocity_y')
-    ax2 = fig.add_subplot(3,3,6)
-    ax2.plot(rover_time_cut, cad_vel_vec[2], label='velocity_z')
-    plt.xlabel('time [sec]')
-    plt.ylabel('velocity [m/s]')
-    plt.title('velocity [m/s] of CADRE Rover over time [s]')
-    plt.legend()
-    plt.autoscale()
-    
-    ax2 = fig.add_subplot(3,3,1)
-    ax2.plot(rover_time_cut, sim_pos_final[0], label='position_x')
-    ax2 = fig.add_subplot(3,3,1)
-    ax2.plot(rover_time_cut, sim_pos_final[1], label='position_y')
-    ax2 = fig.add_subplot(3,3,1)
-    ax2.plot(rover_time_cut, sim_pos_final[2], label='position_z')
-    plt.xlabel('time [sec]')
-    plt.ylabel('Position [m]')
-    plt.title('Position [m] of Simulated Rover over time [s]')
-    plt.legend()
-    plt.autoscale()
-
-    ax2 = fig.add_subplot(3,3,4)
-    ax2.plot(rover_time_cut, cad_centered_pos_x, label='position_x')
-    ax2 = fig.add_subplot(3,3,4)
-    ax2.plot(rover_time_cut, cad_centered_pos_y, label='position_y')
-    ax2 = fig.add_subplot(3,3,4)
-    ax2.plot(rover_time_cut, cad_centered_pos_z, label='position_z')
-    plt.xlabel('time [sec]')
-    plt.ylabel('Position [m]')
-    plt.title('Position [m] of CADRE Rover over time [s]')
-    plt.legend()
-    plt.autoscale()
-
-    cad_rotation_x = trial.rotation_x_cut
-    cad_rotation_y = trial.rotation_y_cut
-    cad_rotation_z = trial.rotation_z_cut
-    cad_rotation_w = trial.rotation_w_cut
-
-    ax2 = fig.add_subplot(3,3,2)
-    ax2.plot(rover_time_cut, sim_rot_x, label='rotation_x')
-    ax2 = fig.add_subplot(3,3,2)
-    ax2.plot(rover_time_cut, sim_rot_y, label='rotation_y')
-    ax2 = fig.add_subplot(3,3,2)
-    ax2.plot(rover_time_cut, sim_rot_z, label='rotation_z')
-    ax2 = fig.add_subplot(3,3,2)
-    ax2.plot(rover_time_cut, sim_rot_w, label='rotation_w')
-    plt.xlabel('time [sec]')
-    plt.ylabel('Rotation []')
-    plt.title('Rotation [] of Simulated Rover over time [s]')
-    plt.legend()
-    plt.autoscale()
-
-
-
-    ax2 = fig.add_subplot(3,3,5)
-    ax2.plot(rover_time_cut, cad_rotation_x, label='rotation_x')
-    ax2 = fig.add_subplot(3,3,5)
-    ax2.plot(rover_time_cut, cad_rotation_y, label='rotation_y')
-    ax2 = fig.add_subplot(3,3,5)
-    ax2.plot(rover_time_cut, cad_rotation_z, label='rotation_z')
-    ax2 = fig.add_subplot(3,3,5)
-    ax2.plot(rover_time_cut, cad_rotation_w, label='rotation_w')
-    plt.xlabel('time [sec]')
-    plt.ylabel('Rotation []')
-    plt.title('Rotation [] of CADRE Rover over time [s]')
-    plt.legend()
-    plt.autoscale()
 
     # CALCULATE RMSE OF POSITION AND ORIENTATION
     # rover's forward is +y in world space, should conduct tests such that +x is forward in world space
@@ -519,15 +425,12 @@ def process_robsag(file):
     print(f"RMSE of rotation: {rmse_rotation}")
 
     # CALCULATE SLIP RATIOS
-    # negative because urdf is messed up and need to flip the direction that the wheels spin
+    # ADJUSTMENT: negate velocity because urdf is messed up and need to flip the direction that the wheels spin
     joint_states_time = joint_states_df["%time"].to_numpy()
     sim_front_left_vel = [-1 * x for x in downsample(rover_time_cut, joint_states_time, joint_states_df["front_left_velocity"].to_numpy())]
     sim_front_right_vel = [-1 * x for x in downsample(rover_time_cut, joint_states_time, joint_states_df["front_right_velocity"].to_numpy())]
     sim_back_left_vel = [-1 * x for x in downsample(rover_time_cut, joint_states_time, joint_states_df["back_left_velocity"].to_numpy())]
     sim_back_right_vel = [-1 * x for x in downsample(rover_time_cut, joint_states_time, joint_states_df["back_right_velocity"].to_numpy())]
-    # clamp the slip ratios to be between -1 and 1, calculate slip ratio s = 1 - (lin_velocity / angular_velocity * radius)
-
-    
 
     epsilon = 0.005 # less than 0.005 m/s considered not moving
     # for i, lin_vel in enumerate(lin_vel_local):
@@ -541,7 +444,7 @@ def process_robsag(file):
     sim_bl_slip = []
     sim_br_slip = []
     for i, lin_vel in enumerate(sim_lin_vel_local):
-        vel = lin_vel[1] if abs(lin_vel[1]) > epsilon else 0 # forward in local space
+        vel = lin_vel[1] if abs(lin_vel[1]) > epsilon else 0 # ADJUSTMENT: using +y axis for index, not +x
         temp_fr_slip = 1-(vel/sim_front_left_vel[i])
         temp_fl_slip = 1-(vel/sim_front_right_vel[i])
         temp_bl_slip = 1-(vel/sim_back_left_vel[i])
@@ -573,7 +476,6 @@ def process_robsag(file):
     cad_vel_vec = np.transpose(cad_vel_vec)
     cad_lin_vel_local = []
     for i, rot in enumerate(cad_rotations):
-        # lin_vel_local.append(np.matmul(np.linalg.inv(rot), np.concatenate((lin_vel_world[i], [1]))))
         cad_lin_vel_local.append(np.dot(np.linalg.inv(rot), np.concatenate((cad_vel_vec[i], [1]))))
     print(cad_lin_vel_local[30][0])
     print(cad_lin_vel_local[30][1])
@@ -586,7 +488,7 @@ def process_robsag(file):
     for i, lin_vel in enumerate(cad_lin_vel_local):
         vel = lin_vel[0] if abs(lin_vel[0]) > epsilon else 0 # forward in local space is +x for CADRE so use index 0
         # front left and front right wheel on cadre are backwards so negate their velocities
-        temp_fr_slip = 1-(vel/-cad_front_left_vel[i])
+        temp_fr_slip = 1-(vel/-cad_front_left_vel[i]) # ADJUSTMENT: negate frontleft and frontright wheels
         temp_fl_slip = 1-(vel/-cad_front_right_vel[i])
         temp_bl_slip = 1-(vel/cad_back_left_vel[i])
         temp_br_slip = 1-(vel/cad_back_right_vel[i])
@@ -622,7 +524,7 @@ def process_robsag(file):
     plt.legend()
 
     # COMPARISON PLOTS
-    fig = plt.figure(figsize=(20,10))
+    fig = plt.figure(figsize=(25,15))
     plt.suptitle(f"Data plots using {cadre_file}")
 
     # position
@@ -655,12 +557,13 @@ def process_robsag(file):
     plt.title('z position [m] over time [s]')
     plt.legend()
     plt.autoscale()
+    plt.tight_layout()
 
 
     # orientation
-    ax2 = fig.add_subplot(4,4,1)
+    ax2 = fig.add_subplot(4,4,5)
     ax2.plot(rover_time_cut, sim_rot_x, label='simulated rover')
-    ax2 = fig.add_subplot(4,4,1)
+    ax2 = fig.add_subplot(4,4,5)
     ax2.plot(rover_time_cut, cad_rotation_x, label='cadre rover')
     plt.xlabel('time [sec]')
     plt.ylabel('rotation []')
@@ -668,9 +571,9 @@ def process_robsag(file):
     plt.legend()
     plt.autoscale()
 
-    ax2 = fig.add_subplot(4,4,2)
+    ax2 = fig.add_subplot(4,4,6)
     ax2.plot(rover_time_cut, sim_rot_y, label='simulated rover')
-    ax2 = fig.add_subplot(4,4,2)
+    ax2 = fig.add_subplot(4,4,6)
     ax2.plot(rover_time_cut, cad_rotation_y, label='cadre_rover')
     plt.xlabel('time [sec]')
     plt.ylabel('rotation []')
@@ -678,9 +581,9 @@ def process_robsag(file):
     plt.legend()
     plt.autoscale()
 
-    ax2 = fig.add_subplot(4,4,3)
+    ax2 = fig.add_subplot(4,4,7)
     ax2.plot(rover_time_cut, sim_rot_z, label='simulated rover')
-    ax2 = fig.add_subplot(4,4,3)
+    ax2 = fig.add_subplot(4,4,7)
     ax2.plot(rover_time_cut, cad_rotation_z, label='cadre_rover')
     plt.xlabel('time [sec]')
     plt.ylabel('rotation []')
@@ -688,24 +591,53 @@ def process_robsag(file):
     plt.legend()
     plt.autoscale()
 
-    ax2 = fig.add_subplot(4,4,4)
+    ax2 = fig.add_subplot(4,4,8)
     ax2.plot(rover_time_cut, cad_rotation_w, label='simulated rover')
-    ax2 = fig.add_subplot(4,4,4)
+    ax2 = fig.add_subplot(4,4,8)
     ax2.plot(rover_time_cut, sim_rot_w, label='cadre_rover')
     plt.xlabel('time [sec]')
     plt.ylabel('rotation []')
     plt.title('w rotation over time [s]')
     plt.legend()
     plt.autoscale()
+    plt.tight_layout()
 
 
     # velocity
+    ax2 = fig.add_subplot(4,4,9)
+    ax2.plot(rover_time_cut, sim_vel_x, label='simulated_rover')
+    ax2 = fig.add_subplot(4,4,9)
+    ax2.plot(rover_time_cut, cad_vel_x, label='cadre_rover')
+    plt.xlabel('time [sec]')
+    plt.ylabel('velocity [m/s]')
+    plt.title('velocity [m/s] over time [s]')
+    plt.legend()
+    plt.autoscale()
 
+    ax2 = fig.add_subplot(4,4,10)
+    ax2.plot(rover_time_cut, sim_vel_y, label='simulated_rover')
+    ax2 = fig.add_subplot(4,4,10)
+    ax2.plot(rover_time_cut, cad_vel_y, label='cadre_rover')
+    plt.xlabel('time [sec]')
+    plt.ylabel('velocity [m/s]')
+    plt.title('velocity [m/s] over time [s]')
+    plt.legend()
+    plt.autoscale()
+
+    ax2 = fig.add_subplot(4,4,11)
+    ax2.plot(rover_time_cut, sim_vel_z, label='simulated_rover')
+    ax2 = fig.add_subplot(4,4,11)
+    ax2.plot(rover_time_cut, cad_vel_z, label='cadre_rover')
+    plt.xlabel('time [sec]')
+    plt.ylabel('velocity [m/s]')
+    plt.title('velocity [m/s] over time [s]')
+    plt.legend()
+    plt.autoscale()
 
     # slip ratio
-    ax3 = fig.add_subplot(4,4,9)
+    ax3 = fig.add_subplot(4,4,13)
     ax3.plot(rover_time_cut, sim_fl_slip, label='simulation front left wheel slip ratio')
-    ax2 = fig.add_subplot(4,4,9)
+    ax2 = fig.add_subplot(4,4,13)
     ax2.plot(rover_time_cut, cad_fl_slip, label='cadre front left wheel slip ratio')
     plt.xlabel('time [sec]')
     plt.ylabel('slip ratio')
@@ -713,9 +645,9 @@ def process_robsag(file):
     plt.autoscale()
     plt.legend()
 
-    ax3 = fig.add_subplot(4,4,10)
+    ax3 = fig.add_subplot(4,4,14)
     ax3.plot(rover_time_cut, sim_fr_slip, label='simulation front right wheel slip ratio')
-    ax3 = fig.add_subplot(4,4,10)
+    ax3 = fig.add_subplot(4,4,14)
     ax3.plot(rover_time_cut, cad_fr_slip, label='cadre front right wheel slip ratio')
     plt.xlabel('time [sec]')
     plt.ylabel('slip ratio')
@@ -723,9 +655,9 @@ def process_robsag(file):
     plt.autoscale()
     plt.legend()
 
-    ax3 = fig.add_subplot(4,4,11)
+    ax3 = fig.add_subplot(4,4,15)
     ax3.plot(rover_time_cut, sim_bl_slip, label='simulation back left wheel slip ratio')
-    ax3 = fig.add_subplot(4,4,11)
+    ax3 = fig.add_subplot(4,4,15)
     ax3.plot(rover_time_cut, cad_bl_slip, label='cadre back left wheel slip ratio')
     plt.xlabel('time [sec]')
     plt.ylabel('slip ratio')
@@ -733,9 +665,9 @@ def process_robsag(file):
     plt.autoscale()
     plt.legend()
 
-    ax3 = fig.add_subplot(4,4,12)
+    ax3 = fig.add_subplot(4,4,16)
     ax3.plot(rover_time_cut, sim_br_slip, label='simulation back right wheel slip ratio')
-    ax3 = fig.add_subplot(4,4,12)
+    ax3 = fig.add_subplot(4,4,16)
     ax3.plot(rover_time_cut, cad_br_slip, label='cadre back right wheel slip ratio')
     plt.xlabel('time [sec]')
     plt.ylabel('slip ratio')
@@ -747,5 +679,116 @@ def process_robsag(file):
     plt.show()
 
 for file in os.listdir(path):
-    if file.endswith('.bag')
+    if file.endswith('.bag'):
         process_robsag(file)
+
+    # # old plots, to use just copy paste into process_rosbag function
+    # ax2 = fig.add_subplot(3,3,3)
+    # ax2.plot(rover_time_cut, sim_vel_x, label='velocity_x')
+    # ax2 = fig.add_subplot(3,3,3)
+    # ax2.plot(rover_time_cut, sim_vel_y, label='velocity_y')
+    # ax2 = fig.add_subplot(3,3,3)
+    # ax2.plot(rover_time_cut, sim_vel_z, label='velocity_z')
+    # plt.xlabel('time [sec]')
+    # plt.ylabel('velocity [m/s]')
+    # plt.title('velocity [m/s] of Simulated Rover over time [s]')
+    # plt.legend()
+    # plt.autoscale()
+
+    # ax2 = fig.add_subplot(3,3,6)
+    # ax2.plot(rover_time_cut, cad_vel_vec[0], label='velocity_x')
+    # ax2 = fig.add_subplot(3,3,6)
+    # ax2.plot(rover_time_cut, cad_vel_vec[1], label='velocity_y')
+    # ax2 = fig.add_subplot(3,3,6)
+    # ax2.plot(rover_time_cut, cad_vel_vec[2], label='velocity_z')
+    # plt.xlabel('time [sec]')
+    # plt.ylabel('velocity [m/s]')
+    # plt.title('velocity [m/s] of CADRE Rover over time [s]')
+    # plt.legend()
+    # plt.autoscale()
+    
+    # ax2 = fig.add_subplot(3,3,1)
+    # ax2.plot(rover_time_cut, sim_pos_final[0], label='position_x')
+    # ax2 = fig.add_subplot(3,3,1)
+    # ax2.plot(rover_time_cut, sim_pos_final[1], label='position_y')
+    # ax2 = fig.add_subplot(3,3,1)
+    # ax2.plot(rover_time_cut, sim_pos_final[2], label='position_z')
+    # plt.xlabel('time [sec]')
+    # plt.ylabel('Position [m]')
+    # plt.title('Position [m] of Simulated Rover over time [s]')
+    # plt.legend()
+    # plt.autoscale()
+
+    # ax2 = fig.add_subplot(3,3,4)
+    # ax2.plot(rover_time_cut, cad_centered_pos_x, label='position_x')
+    # ax2 = fig.add_subplot(3,3,4)
+    # ax2.plot(rover_time_cut, cad_centered_pos_y, label='position_y')
+    # ax2 = fig.add_subplot(3,3,4)
+    # ax2.plot(rover_time_cut, cad_centered_pos_z, label='position_z')
+    # plt.xlabel('time [sec]')
+    # plt.ylabel('Position [m]')
+    # plt.title('Position [m] of CADRE Rover over time [s]')
+    # plt.legend()
+    # plt.autoscale()
+
+    # ax2 = fig.add_subplot(3,3,2)
+    # ax2.plot(rover_time_cut, sim_rot_x, label='rotation_x')
+    # ax2 = fig.add_subplot(3,3,2)
+    # ax2.plot(rover_time_cut, sim_rot_y, label='rotation_y')
+    # ax2 = fig.add_subplot(3,3,2)
+    # ax2.plot(rover_time_cut, sim_rot_z, label='rotation_z')
+    # ax2 = fig.add_subplot(3,3,2)
+    # ax2.plot(rover_time_cut, sim_rot_w, label='rotation_w')
+    # plt.xlabel('time [sec]')
+    # plt.ylabel('Rotation []')
+    # plt.title('Rotation [] of Simulated Rover over time [s]')
+    # plt.legend()
+    # plt.autoscale()
+
+
+
+    # ax2 = fig.add_subplot(3,3,5)
+    # ax2.plot(rover_time_cut, cad_rotation_x, label='rotation_x')
+    # ax2 = fig.add_subplot(3,3,5)
+    # ax2.plot(rover_time_cut, cad_rotation_y, label='rotation_y')
+    # ax2 = fig.add_subplot(3,3,5)
+    # ax2.plot(rover_time_cut, cad_rotation_z, label='rotation_z')
+    # ax2 = fig.add_subplot(3,3,5)
+    # ax2.plot(rover_time_cut, cad_rotation_w, label='rotation_w')
+    # plt.xlabel('time [sec]')
+    # plt.ylabel('Rotation []')
+    # plt.title('Rotation [] of CADRE Rover over time [s]')
+    # plt.legend()
+    # plt.autoscale()
+
+
+
+
+
+
+
+# notes from meeting
+# import cadre data with 0 degrees
+
+# Slip vs sinkage 
+# slip vs angle
+
+# necessary
+# RMS error xyz across time
+    # between samples
+    # Useful for? 
+        # represent steady state vs initial condition
+
+# nice to have
+# compare to ishigami's theory
+    # drawbar pull
+# virtual bevameter?
+    # sinkage pressure curve
+
+# tonight, traction equations
+# grouser modeling
+
+# mock results
+# 1. cadre initial conditions into sim
+# 2. sampling rate, run couple tests on titan
+# 3. analysis: RMS error, angular velocity, position, linear velocity, etc

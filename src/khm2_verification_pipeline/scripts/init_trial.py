@@ -1,23 +1,23 @@
 #!/usr/bin/env python3
 
-import roslaunch
+import rospy
+import rospkg
 import xml.etree.ElementTree as ET # GO HOME
 
-uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
-roslaunch.configure_logging(uuid)
+# This python script meant to be run before gazebo is launched. Edits the world file
 
-trial_params_args = ['khm2_verification_pipeline', 'trial_params.launch']
-trial_params_launch = roslaunch.rlutil.resolve_launch_arguments(trial_params_args)[0]
-print(trial_params_launch)
+# set up the world launch file's rotation
+rospy.init_node("set_floor_rotation_node")
+rospack = rospkg.RosPack()
+world_file_path = rospack.get_path('khm2_gazebo') + '/worlds/verification_pipeline_debug.world'
+tree = ET.parse(world_file_path)
+xml_root = tree.getroot()
 
-sim_args = ['khm2_bringup', 'simulation.launch']
-sim_launch = roslaunch.rlutil.resolve_launch_arguments(sim_args)[0]
+degrees = rospy.get_param("/trial_params/angle", 0)
+radians = degrees * 3.141592 / 180
+rospy.loginfo(f"Setting floor rotation to: {degrees} degrees")
+floor_link = f"./world/state/model[@name='Floor']/link[@name='link_0']/pose"
+xml_root.find(floor_link).text = f"-0.010923 0.300375 -0.916015 0 {-radians} 0"
+tree.write(world_file_path)
 
-rover_args = ['khm2_bringup', 'rover.launch']
-rover_launch = roslaunch.rlutil.resolve_launch_arguments(rover_args)[0]
-
-launch_files = [trial_params_launch, sim_launch, rover_launch]
-parent = roslaunch.parent.ROSLaunchParent(uuid, launch_files)
-
-parent.start()
-parent.spin()
+# read cadre data file

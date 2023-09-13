@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from tf.transformations import quaternion_matrix, rotation_matrix
 from scipy.spatial.transform import Rotation
 import analysis
-from analysis import data
+import math
 import warnings
 
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -55,9 +55,10 @@ class data:
         self.motor_current_3_cut = motor_current_3_cut
         self.motor_current_4_cut = motor_current_4_cut
 
-for file in os.listdir(path):
+def process_robsag(file):
     if not file.endswith(".bag"):
-        continue
+        print(f'File: {file} | is not a bag file')
+        return
     file_path = os.path.join(path, file)
     file_name_no_ext = str.rstrip(os.path.basename(file_path), ".bag")
     output_dir_path = f"{os.path.dirname(file_path)}/{file_name_no_ext}_csv"
@@ -172,6 +173,11 @@ for file in os.listdir(path):
     delete_field_from_col(bl_torque_df)
     delete_field_from_col(br_torque_df)
 
+
+    # STEADY STATE TIME CALCULATION, CUT ALL DATA
+    steady_state_time = (steady_state_time_df["%time"][0] / 1_000_000_000) - joint_states_df["%time"][0]
+
+
     # ============== clean wheel torque dataframes ==============
     def clean_torque_dataframes(d: pd.DataFrame, prepend_val):
         renamed_cols = []
@@ -276,8 +282,6 @@ for file in os.listdir(path):
     print_df_keys(bl_torque_df)
     print_df_keys(br_torque_df)
 
-    # STEADY STATE TIME CALCULATION
-    steady_state_time = (steady_state_time_df["%time"][0] / 1_000_000_000) - joint_states_df["%time"][0]
 
     # import cadre data with 0 degrees
 
@@ -322,20 +326,21 @@ for file in os.listdir(path):
     deg0_files = [file for file in cadre_data.keys() if degrees_mapped_files[file] == 0]
 
     # degree 0 trial cadre
-    trial = cadre_data[deg0_files[0]]
+    cadre_file = deg0_files[0]
+    trial = cadre_data[cadre_file]
     rover_time_cut = trial.rover_time_cut
-
     
     # create figure for plots
     fig = plt.figure(figsize=(20,10))
+    plt.suptitle(f"Data plots using {cadre_file}")
 
     state_df_time = state_df["%time"].to_numpy()
     posx_downsampled = downsample(rover_time_cut, state_df_time, state_df["pose.position.x"].to_numpy())
     posy_downsampled = downsample(rover_time_cut, state_df_time, state_df["pose.position.y"].to_numpy())
     posz_downsampled = downsample(rover_time_cut, state_df_time, state_df["pose.position.z"].to_numpy())
-    posx_downsampled = [-1 * x for x in posx_downsampled]
-    posy_downsampled = [-1 * x for x in posy_downsampled]
-    posz_downsampled = [-1 * x for x in posz_downsampled]
+    posx_downsampled = [x for x in posx_downsampled]
+    posy_downsampled = [x for x in posy_downsampled]
+    posz_downsampled = [x for x in posz_downsampled]
 
     # center rover at origin
     sim_centered_pos_x = [x - posx_downsampled[0] for x in posx_downsampled]
@@ -349,9 +354,9 @@ for file in os.listdir(path):
     # print(np.transpose(np.array([cad_centered_pos_x, cad_centered_pos_y, cad_centered_pos_z, [1 for p in d0.position_x_cut]]))[30:60])
 
     # linear velocity xyz and angular velocity xyz of rover
-    sim_lin_x = downsample(rover_time_cut, state_df_time, state_df["twist.linear.x"].to_numpy())
-    sim_lin_y = downsample(rover_time_cut, state_df_time, state_df["twist.linear.y"].to_numpy())
-    sim_lin_z = downsample(rover_time_cut, state_df_time, state_df["twist.linear.z"].to_numpy())
+    sim_vel_x = downsample(rover_time_cut, state_df_time, state_df["twist.linear.x"].to_numpy())
+    sim_vel_y = downsample(rover_time_cut, state_df_time, state_df["twist.linear.y"].to_numpy())
+    sim_vel_z = downsample(rover_time_cut, state_df_time, state_df["twist.linear.z"].to_numpy())
     sim_ang_x = downsample(rover_time_cut, state_df_time, state_df["twist.angular.x"].to_numpy())
     sim_ang_y = downsample(rover_time_cut, state_df_time, state_df["twist.angular.y"].to_numpy())
     sim_ang_z = downsample(rover_time_cut, state_df_time, state_df["twist.angular.z"].to_numpy())
@@ -359,62 +364,71 @@ for file in os.listdir(path):
     sim_rot_y = downsample(rover_time_cut, state_df_time, state_df["pose.orientation.y"].to_numpy())
     sim_rot_z = downsample(rover_time_cut, state_df_time, state_df["pose.orientation.z"].to_numpy())
     sim_rot_w = downsample(rover_time_cut, state_df_time, state_df["pose.orientation.w"].to_numpy())
-    quat_df = np.transpose(np.array([sim_rot_x, sim_rot_y, sim_rot_z, sim_rot_w]))
+    sim_rot_quaternions = np.transpose(np.array([sim_rot_x, sim_rot_y, sim_rot_z, sim_rot_w]))
 
     # World space linear velocity of rover
-    lin_vel_world = np.array(np.transpose([sim_lin_x, sim_lin_y, sim_lin_z]))
+    lin_vel_world = np.array(np.transpose([sim_vel_x, sim_vel_y, sim_vel_z]))
     ang_vel_world = np.array(np.transpose([sim_ang_x, sim_ang_y, sim_ang_z]))
 
     # get rotation matrix to convert to local space
-    rotations = []
-    for quat in quat_df:
-        rotations.append(quaternion_matrix(quat))
+    sim_rotations = []
+    for quat in sim_rot_quaternions:
+        sim_rotations.append(quaternion_matrix(quat))
 
     # transform to local space for linear velocity 
-    lin_vel_local = []
-    ang_vel_local = []
-    for i, rot in enumerate(rotations):
+    sim_lin_vel_local = []
+    sim_ang_vel_local = []
+    for i, rot in enumerate(sim_rotations):
         # lin_vel_local.append(np.matmul(np.linalg.inv(rot), np.concatenate((lin_vel_world[i], [1]))))
-        lin_vel_local.append(np.dot(rot, np.concatenate((lin_vel_world[i], [1]))))
-        ang_vel_local.append(np.matmul(np.linalg.inv(rot), np.concatenate((ang_vel_world[i], [1]))))
+        sim_lin_vel_local.append(np.dot(np.linalg.inv(rot), np.concatenate((lin_vel_world[i], [1]))))
+        sim_ang_vel_local.append(np.dot(np.linalg.inv(rot), np.concatenate((ang_vel_world[i], [1]))))
     # print(lin_vel_world[30:60])
     # print(np.array(lin_vel_local[30:60]))
 
     # indexes 0=x, 1=y, 2=z
-    lin_vel_x_local = np.transpose(lin_vel_local)[0]
-    lin_vel_y_local = np.transpose(lin_vel_local)[1]
-    lin_vel_z_local = np.transpose(lin_vel_local)[2]
-    ang_vel_x_local = np.transpose(ang_vel_local)[0] # not quite used yet
-    ang_vel_y_local = np.transpose(ang_vel_local)[1]
-    ang_vel_z_local = np.transpose(ang_vel_local)[2]
+    sim_lin_vel_x_local = np.transpose(sim_lin_vel_local)[0]
+    sim_lin_vel_y_local = np.transpose(sim_lin_vel_local)[1]
+    sim_lin_vel_z_local = np.transpose(sim_lin_vel_local)[2]
+    sim_ang_vel_x_local = np.transpose(sim_ang_vel_local)[0] # not quite used yet
+    sim_ang_vel_y_local = np.transpose(sim_ang_vel_local)[1]
+    sim_ang_vel_z_local = np.transpose(sim_ang_vel_local)[2]
 
-    
-
-
-
-    # TEMPORARY ROTATE AROUND Z AXIS BY 90 DEGREES
-    rotation = rotation_matrix(np.pi / 2, [0, 0, 1], [0, 0, 0])
-    sim_pos_final = np.matmul(np.linalg.inv(rotation), np.array([sim_centered_pos_x, sim_centered_pos_y, sim_centered_pos_z, [1 for p in sim_centered_pos_x]]))
-    cad_pos_final = np.transpose(np.array([cad_centered_pos_x, cad_centered_pos_y, cad_centered_pos_z]))
+    # rotation = rotation_matrix(np.pi / 2, [0, 0, 1], [0, 0, 0])
+    # sim_pos_final = np.matmul(np.linalg.inv(rotation), np.array([sim_centered_pos_x, sim_centered_pos_y, sim_centered_pos_z, [1 for p in sim_centered_pos_x]]))
+    sim_pos_final = np.array([sim_centered_pos_x, sim_centered_pos_y, sim_centered_pos_z])
+    cad_pos_vec = np.transpose(np.array([cad_centered_pos_x, cad_centered_pos_y, cad_centered_pos_z]))
 
     # CALCULATE CADRE ROVER VELOCITIES USING POSITION
     def component_velocity(x1, t1, x2, t2):
         return (x2 - x1) / (t2 - t1)
 
+    # calculate velocity of cadre rover using position and time data
     cad_vel_x = [0]
     cad_vel_y = [0]
     cad_vel_z = [0]
-    pos_vec = np.transpose(np.array([cad_centered_pos_x, cad_centered_pos_y, cad_centered_pos_z]))
-    for i, pos in enumerate(pos_vec):
+    for i, pos in enumerate(cad_pos_vec):
         if i == 0:
             continue
-        vel_x = component_velocity(pos_vec[i-1][0], rover_time_cut[i-1], pos_vec[i][0], rover_time_cut[i])
-        vel_y = component_velocity(pos_vec[i-1][1], rover_time_cut[i-1], pos_vec[i][1], rover_time_cut[i])
-        vel_z = component_velocity(pos_vec[i-1][2], rover_time_cut[i-1], pos_vec[i][2], rover_time_cut[i])
+        vel_x = component_velocity(cad_pos_vec[i-1][0], rover_time_cut[i-1], cad_pos_vec[i][0], rover_time_cut[i])
+        vel_y = component_velocity(cad_pos_vec[i-1][1], rover_time_cut[i-1], cad_pos_vec[i][1], rover_time_cut[i])
+        vel_z = component_velocity(cad_pos_vec[i-1][2], rover_time_cut[i-1], cad_pos_vec[i][2], rover_time_cut[i])
         cad_vel_x.append(vel_x)
         cad_vel_y.append(vel_y)
         cad_vel_z.append(vel_z)
     cad_vel_vec = np.array([cad_vel_x, cad_vel_y, cad_vel_z])
+
+
+    ax2 = fig.add_subplot(3,3,3)
+    ax2.plot(rover_time_cut, sim_vel_x, label='velocity_x')
+    ax2 = fig.add_subplot(3,3,3)
+    ax2.plot(rover_time_cut, sim_vel_y, label='velocity_y')
+    ax2 = fig.add_subplot(3,3,3)
+    ax2.plot(rover_time_cut, sim_vel_z, label='velocity_z')
+    plt.xlabel('time [sec]')
+    plt.ylabel('velocity [m/s]')
+    plt.title('velocity [m/s] of Simulated Rover over time [s]')
+    plt.legend()
+    plt.autoscale()
 
     ax2 = fig.add_subplot(3,3,6)
     ax2.plot(rover_time_cut, cad_vel_vec[0], label='velocity_x')
@@ -424,7 +438,7 @@ for file in os.listdir(path):
     ax2.plot(rover_time_cut, cad_vel_vec[2], label='velocity_z')
     plt.xlabel('time [sec]')
     plt.ylabel('velocity [m/s]')
-    plt.title('velocity [m/s] of Simulated Rover over time [s]')
+    plt.title('velocity [m/s] of CADRE Rover over time [s]')
     plt.legend()
     plt.autoscale()
     
@@ -466,10 +480,12 @@ for file in os.listdir(path):
     ax2 = fig.add_subplot(3,3,2)
     ax2.plot(rover_time_cut, sim_rot_w, label='rotation_w')
     plt.xlabel('time [sec]')
-    plt.ylabel('Rotation [m]')
-    plt.title('Rotation [m] of Simulated Rover over time [s]')
+    plt.ylabel('Rotation []')
+    plt.title('Rotation [] of Simulated Rover over time [s]')
     plt.legend()
     plt.autoscale()
+
+
 
     ax2 = fig.add_subplot(3,3,5)
     ax2.plot(rover_time_cut, cad_rotation_x, label='rotation_x')
@@ -486,14 +502,14 @@ for file in os.listdir(path):
     plt.autoscale()
 
     # CALCULATE RMSE OF POSITION AND ORIENTATION
-    # rover's forward is -y in world space, should conduct tests such that +x is forward in world space
+    # rover's forward is +y in world space, should conduct tests such that +x is forward in world space
     # cadre's forward is +x in world space, left right = y, up down = z
     def rmse(expected, actual):
         return np.sqrt(np.square(np.subtract(expected, actual)).mean())
 
     # RMSE of position
     sim_pos_final_vec3 = np.transpose(sim_pos_final[:3]) # remove the 1s at the end
-    rmse_position = rmse(cad_pos_final, sim_pos_final_vec3)
+    rmse_position = rmse(cad_pos_vec, sim_pos_final_vec3)
     print(f"RMSE of position: {rmse_position}")
 
     # RMSE of orientation
@@ -505,57 +521,231 @@ for file in os.listdir(path):
     # CALCULATE SLIP RATIOS
     # negative because urdf is messed up and need to flip the direction that the wheels spin
     joint_states_time = joint_states_df["%time"].to_numpy()
-    front_left_vel = downsample(rover_time_cut, joint_states_time, joint_states_df["front_left_velocity"].to_numpy())
-    front_right_vel = downsample(rover_time_cut, joint_states_time, joint_states_df["front_right_velocity"].to_numpy())
-    back_left_vel = downsample(rover_time_cut, joint_states_time, joint_states_df["back_left_velocity"].to_numpy())
-    back_right_vel = downsample(rover_time_cut, joint_states_time, joint_states_df["back_right_velocity"].to_numpy())
+    sim_front_left_vel = [-1 * x for x in downsample(rover_time_cut, joint_states_time, joint_states_df["front_left_velocity"].to_numpy())]
+    sim_front_right_vel = [-1 * x for x in downsample(rover_time_cut, joint_states_time, joint_states_df["front_right_velocity"].to_numpy())]
+    sim_back_left_vel = [-1 * x for x in downsample(rover_time_cut, joint_states_time, joint_states_df["back_left_velocity"].to_numpy())]
+    sim_back_right_vel = [-1 * x for x in downsample(rover_time_cut, joint_states_time, joint_states_df["back_right_velocity"].to_numpy())]
     # clamp the slip ratios to be between -1 and 1, calculate slip ratio s = 1 - (lin_velocity / angular_velocity * radius)
 
-    # fl_slip = []
-    # fr_slip = []
-    # bl_slip = []
-    # br_slip = []
-    # for lin_vel in lin_vel_local:
-    #     epsilon = 0.001
-    #     if lin_vel < epsilon:
-
+    
 
     epsilon = 0.005 # less than 0.005 m/s considered not moving
     # for i, lin_vel in enumerate(lin_vel_local):
     #     if abs(lin_vel[1]) < epsilon:
     #         lin_vel_local[i][1] = 0
-    fl_slip = []
-    fr_slip = []
-    bl_slip = []
-    br_slip = []
-    for i, lin_vel in enumerate(lin_vel_local):
-        vel = -lin_vel[1] if abs(lin_vel[1]) > epsilon else 0 # forward in local space
-        temp_fr_slip = 1-(vel/front_left_vel[i])
-        temp_fl_slip = 1-(vel/front_right_vel[i])
-        temp_bl_slip = 1-(vel/back_left_vel[i])
-        temp_br_slip = 1-(vel/back_right_vel[i])
-        fl_slip.append(temp_fl_slip)
-        fr_slip.append(temp_fr_slip)
-        bl_slip.append(temp_bl_slip)
-        br_slip.append(temp_br_slip)
-    # fr_slip = np.clip([1 - (-lin_vel[1] / front_right_vel[i]) for i, lin_vel in enumerate(lin_vel_local)], -1, 1)
-    # fr_slip = np.clip([1 - (-lin_vel[1] / front_right_vel[i]) for i, lin_vel in enumerate(lin_vel_local)], -1, 1)
-    # bl_slip = np.clip([1 - (-lin_vel[1] / back_left_vel[i]) for i, lin_vel in enumerate(lin_vel_local)], -1, 1)
-    # br_slip = np.clip([1 - (-lin_vel[1] / back_right_vel[i]) for i, lin_vel in enumerate(lin_vel_local)], -1, 1)
+    print(sim_lin_vel_local[30][0])
+    print(sim_lin_vel_local[30][1])
+    print(sim_lin_vel_local[30][2])
+    sim_fl_slip = []
+    sim_fr_slip = []
+    sim_bl_slip = []
+    sim_br_slip = []
+    for i, lin_vel in enumerate(sim_lin_vel_local):
+        vel = lin_vel[1] if abs(lin_vel[1]) > epsilon else 0 # forward in local space
+        temp_fr_slip = 1-(vel/sim_front_left_vel[i])
+        temp_fl_slip = 1-(vel/sim_front_right_vel[i])
+        temp_bl_slip = 1-(vel/sim_back_left_vel[i])
+        temp_br_slip = 1-(vel/sim_back_right_vel[i])
+        sim_fl_slip.append(temp_fl_slip)
+        sim_fr_slip.append(temp_fr_slip)
+        sim_bl_slip.append(temp_bl_slip)
+        sim_br_slip.append(temp_br_slip)
+
+    # CALCULATE CADRE SLIP RATIO, 
+    # Need local velocity of rover, and angular velocity and radius of wheels 
+    # to find local velocity of rover, need rotation to transform
+    cad_rot_quaternions = np.transpose(np.array([cad_rotation_x, cad_rotation_y, cad_rotation_z, cad_rotation_w]))
+    
+    # 850 = gear ratio, 60 min to sec, 2*pi*r = 2pi(0.075cm/s) = circumference. Get angular velocity in m/s
+    cad_front_left_vel = [(rpm / 850 / 60) * 2 * math.pi * 0.075 for rpm in trial.motor_rpm_1_cut] 
+    cad_front_right_vel = [(rpm / 850 / 60) * 2 * math.pi * 0.075 for rpm in trial.motor_rpm_2_cut]
+    cad_back_left_vel = [(rpm / 850 / 60) * 2 * math.pi * 0.075 for rpm in trial.motor_rpm_3_cut]
+    cad_back_right_vel = [(rpm / 850 / 60) * 2 * math.pi * 0.075 for rpm in trial.motor_rpm_4_cut]
+
+    # get rotation matrix to convert to local space
+    cad_rotations = []
+    for quat in cad_rot_quaternions:
+        cad_rotations.append(quaternion_matrix(quat))
+
+    print(np.shape(cad_vel_vec))
+
+    # transform to local space for linear velocity for CADRE
+    cad_vel_vec = np.transpose(cad_vel_vec)
+    cad_lin_vel_local = []
+    for i, rot in enumerate(cad_rotations):
+        # lin_vel_local.append(np.matmul(np.linalg.inv(rot), np.concatenate((lin_vel_world[i], [1]))))
+        cad_lin_vel_local.append(np.dot(np.linalg.inv(rot), np.concatenate((cad_vel_vec[i], [1]))))
+    print(cad_lin_vel_local[30][0])
+    print(cad_lin_vel_local[30][1])
+    print(cad_lin_vel_local[30][2])
+
+    cad_fl_slip = []
+    cad_fr_slip = []
+    cad_bl_slip = []
+    cad_br_slip = []
+    for i, lin_vel in enumerate(cad_lin_vel_local):
+        vel = lin_vel[0] if abs(lin_vel[0]) > epsilon else 0 # forward in local space is +x for CADRE so use index 0
+        # front left and front right wheel on cadre are backwards so negate their velocities
+        temp_fr_slip = 1-(vel/-cad_front_left_vel[i])
+        temp_fl_slip = 1-(vel/-cad_front_right_vel[i])
+        temp_bl_slip = 1-(vel/cad_back_left_vel[i])
+        temp_br_slip = 1-(vel/cad_back_right_vel[i])
+        cad_fl_slip.append(temp_fl_slip)
+        cad_fr_slip.append(temp_fr_slip)
+        cad_bl_slip.append(temp_bl_slip)
+        cad_br_slip.append(temp_br_slip)
 
     ax2 = fig.add_subplot(3,3,7)
-    ax2.plot(rover_time_cut, fl_slip, label='front left wheel slip ratio')
+    ax2.plot(rover_time_cut, sim_fl_slip, label='front left wheel slip ratio')
     ax2 = fig.add_subplot(3,3,7)
-    ax2.plot(rover_time_cut, fr_slip, label='front right wheel slip ratio')
+    ax2.plot(rover_time_cut, sim_fr_slip, label='front right wheel slip ratio')
     ax2 = fig.add_subplot(3,3,7)
-    ax2.plot(rover_time_cut, bl_slip, label='back left wheel slip ratio')
+    ax2.plot(rover_time_cut, sim_bl_slip, label='back left wheel slip ratio')
     ax2 = fig.add_subplot(3,3,7)
-    ax2.plot(rover_time_cut, br_slip, label='back right wheel slip ratio')
+    ax2.plot(rover_time_cut, sim_br_slip, label='back right wheel slip ratio')
+    plt.xlabel('time [sec]')
+    plt.ylabel('simulated rover slip ratio')
+    plt.autoscale()
+    plt.legend()
+
+    ax2 = fig.add_subplot(3,3,8)
+    ax2.plot(rover_time_cut, cad_fl_slip, label='front left wheel slip ratio')
+    ax2 = fig.add_subplot(3,3,8)
+    ax2.plot(rover_time_cut, cad_fr_slip, label='front right wheel slip ratio')
+    ax2 = fig.add_subplot(3,3,8)
+    ax2.plot(rover_time_cut, cad_bl_slip, label='back left wheel slip ratio')
+    ax2 = fig.add_subplot(3,3,8)
+    ax2.plot(rover_time_cut, cad_br_slip, label='back right wheel slip ratio')
+    plt.xlabel('time [sec]')
+    plt.ylabel('cadre rover slip ratio')
+    plt.autoscale()
+    plt.legend()
+
+    # COMPARISON PLOTS
+    fig = plt.figure(figsize=(20,10))
+    plt.suptitle(f"Data plots using {cadre_file}")
+
+    # position
+    ax2 = fig.add_subplot(4,4,1)
+    ax2.plot(rover_time_cut, cad_centered_pos_x, label='simulated_rover')
+    ax2 = fig.add_subplot(4,4,1)
+    ax2.plot(rover_time_cut, sim_pos_final[0], label='cadre_rover')
+    plt.xlabel('time [sec]')
+    plt.ylabel('x position [m]')
+    plt.title('x position [m] over time [s]')
+    plt.legend()
+    plt.autoscale()
+
+    ax2 = fig.add_subplot(4,4,2)
+    ax2.plot(rover_time_cut, sim_pos_final[1], label='simulated_rover')
+    ax2 = fig.add_subplot(4,4,2)
+    ax2.plot(rover_time_cut, cad_centered_pos_y, label='cadre_rover')
+    plt.xlabel('time [sec]')
+    plt.ylabel('y position [m]')
+    plt.title('y position [m] over time [s]')
+    plt.legend()
+    plt.autoscale()
+
+    ax2 = fig.add_subplot(4,4,3)
+    ax2.plot(rover_time_cut, sim_pos_final[2], label='simulated_rover')
+    ax2 = fig.add_subplot(4,4,3)
+    ax2.plot(rover_time_cut, cad_centered_pos_z, label='cadre_rover')
+    plt.xlabel('time [sec]')
+    plt.ylabel('z position [m]')
+    plt.title('z position [m] over time [s]')
+    plt.legend()
+    plt.autoscale()
+
+
+    # orientation
+    ax2 = fig.add_subplot(4,4,1)
+    ax2.plot(rover_time_cut, sim_rot_x, label='simulated rover')
+    ax2 = fig.add_subplot(4,4,1)
+    ax2.plot(rover_time_cut, cad_rotation_x, label='cadre rover')
+    plt.xlabel('time [sec]')
+    plt.ylabel('rotation []')
+    plt.title('x rotation over time [s]')
+    plt.legend()
+    plt.autoscale()
+
+    ax2 = fig.add_subplot(4,4,2)
+    ax2.plot(rover_time_cut, sim_rot_y, label='simulated rover')
+    ax2 = fig.add_subplot(4,4,2)
+    ax2.plot(rover_time_cut, cad_rotation_y, label='cadre_rover')
+    plt.xlabel('time [sec]')
+    plt.ylabel('rotation []')
+    plt.title('y rotation over time [s]')
+    plt.legend()
+    plt.autoscale()
+
+    ax2 = fig.add_subplot(4,4,3)
+    ax2.plot(rover_time_cut, sim_rot_z, label='simulated rover')
+    ax2 = fig.add_subplot(4,4,3)
+    ax2.plot(rover_time_cut, cad_rotation_z, label='cadre_rover')
+    plt.xlabel('time [sec]')
+    plt.ylabel('rotation []')
+    plt.title('z rotation over time [s]')
+    plt.legend()
+    plt.autoscale()
+
+    ax2 = fig.add_subplot(4,4,4)
+    ax2.plot(rover_time_cut, cad_rotation_w, label='simulated rover')
+    ax2 = fig.add_subplot(4,4,4)
+    ax2.plot(rover_time_cut, sim_rot_w, label='cadre_rover')
+    plt.xlabel('time [sec]')
+    plt.ylabel('rotation []')
+    plt.title('w rotation over time [s]')
+    plt.legend()
+    plt.autoscale()
+
+
+    # velocity
+
+
+    # slip ratio
+    ax3 = fig.add_subplot(4,4,9)
+    ax3.plot(rover_time_cut, sim_fl_slip, label='simulation front left wheel slip ratio')
+    ax2 = fig.add_subplot(4,4,9)
+    ax2.plot(rover_time_cut, cad_fl_slip, label='cadre front left wheel slip ratio')
     plt.xlabel('time [sec]')
     plt.ylabel('slip ratio')
+    plt.title("front left wheel slip ratio")
+    plt.autoscale()
+    plt.legend()
+
+    ax3 = fig.add_subplot(4,4,10)
+    ax3.plot(rover_time_cut, sim_fr_slip, label='simulation front right wheel slip ratio')
+    ax3 = fig.add_subplot(4,4,10)
+    ax3.plot(rover_time_cut, cad_fr_slip, label='cadre front right wheel slip ratio')
+    plt.xlabel('time [sec]')
+    plt.ylabel('slip ratio')
+    plt.title("front right wheel slip ratio")
+    plt.autoscale()
+    plt.legend()
+
+    ax3 = fig.add_subplot(4,4,11)
+    ax3.plot(rover_time_cut, sim_bl_slip, label='simulation back left wheel slip ratio')
+    ax3 = fig.add_subplot(4,4,11)
+    ax3.plot(rover_time_cut, cad_bl_slip, label='cadre back left wheel slip ratio')
+    plt.xlabel('time [sec]')
+    plt.ylabel('slip ratio')
+    plt.title("back left wheel slip ratio")
+    plt.autoscale()
+    plt.legend()
+
+    ax3 = fig.add_subplot(4,4,12)
+    ax3.plot(rover_time_cut, sim_br_slip, label='simulation back right wheel slip ratio')
+    ax3 = fig.add_subplot(4,4,12)
+    ax3.plot(rover_time_cut, cad_br_slip, label='cadre back right wheel slip ratio')
+    plt.xlabel('time [sec]')
+    plt.ylabel('slip ratio')
+    plt.title("back right wheel slip ratio")
     plt.autoscale()
     plt.legend()
 
     plt.tight_layout()
     plt.show()
 
+for file in os.listdir(path):
+    if file.endswith('.bag')
+        process_robsag(file)

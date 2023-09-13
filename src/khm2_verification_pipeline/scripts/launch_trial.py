@@ -20,7 +20,7 @@ if angle == None:
     rospy.set_param('/trial_params/angle', 0)
     angle = 0
 already_reached_steady_state = False
-steady_state_time = rospy.Publisher("/steady_state_time", Float32, queue_size=10)
+steady_state_time = rospy.Publisher("/steady_state_time", Float32, queue_size=10, latch=True)
 joint_state_time = 0
 
 # ===== START ROSLAUNCH SETUP

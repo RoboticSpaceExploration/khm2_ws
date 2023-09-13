@@ -1,14 +1,14 @@
-<sdf version="1.7">
-  <world name="empty">
-    <plugin name="hina_physics" filename="src/hina_ssi_physics/libhina_ssi_plugin_physics.so">
-      <width_x />
-      <width_y />
-      <scale />
+<sdf version='1.7'>
+  <world name='empty'>
+    <plugin name='hina_physics' filename='src/hina_ssi_physics/libhina_ssi_plugin_physics.so'>
+      <width_x/>
+      <width_y/>
+      <scale/>
     </plugin>
     <gravity>0 0 -9.8</gravity>
     <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
-    <atmosphere type="adiabatic" />
-    <physics type="ode">
+    <atmosphere type='adiabatic'/>
+    <physics type='ode'>
       <max_step_size>0.001</max_step_size>
       <real_time_factor>1</real_time_factor>
       <real_time_update_rate>1000</real_time_update_rate>
@@ -18,7 +18,7 @@
       <background>0.7 0.7 0.7 1</background>
       <shadows>1</shadows>
     </scene>
-    <wind />
+    <wind/>
     <spherical_coordinates>
       <surface_model>EARTH_WGS84</surface_model>
       <latitude_deg>0</latitude_deg>
@@ -26,11 +26,11 @@
       <elevation>0</elevation>
       <heading_deg>0</heading_deg>
     </spherical_coordinates>
-    <model name="ground_plane">
+    <model name='ground_plane'>
       <static>1</static>
-      <link name="link">
-        <visual name="visual">
-          <plugin name="hina" filename="src/hina_ssi_visual/libhina_ssi_plugin_visual.so" />
+      <link name='link'>
+        <visual name='visual'>
+          <plugin name='hina' filename='src/hina_ssi_visual/libhina_ssi_plugin_visual.so'/>
           <cast_shadows>0</cast_shadows>
           <geometry>
             <plane>
@@ -51,62 +51,77 @@
       </link>
       <pose>0.252724 -0.228037 0 0 -0 0</pose>
     </model>
-    <state world_name="empty">
-      <sim_time>293 950000000</sim_time>
-      <real_time>135 996977656</real_time>
-      <wall_time>1693865892 699028578</wall_time>
-      <iterations>135490</iterations>
-      <model name="Floor">
-        <pose>-0.010923 0.300375 -0.916015 0 0 0</pose>
+    <state world_name='empty'>
+      <sim_time>411 721000000</sim_time>
+      <real_time>118 286515909</real_time>
+      <wall_time>1694579777 45820104</wall_time>
+      <iterations>117771</iterations>
+      <model name='Floor'>
+        <pose>-0.010923 0.300375 -0.916015 0 -0 0</pose>
         <scale>1 1 1</scale>
-        
-          <surface>
-            <friction>
-              <ode>
-                <mu>0.2</mu> 
-                <mu2>0.2</mu2>
-              </ode>
-            </friction>
-          </surface>
-        <link name="link_0">
-          <pose>-0.010923 0.300375 -0.916015 0 -0.0 0</pose>
+        <link name='link_0'>
+          <pose>-0.010923 0.300375 -0.916015 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
-      <model name="ground_plane">
+      <model name='ground_plane'>
         <pose>0.252724 -0.228037 0 0 -0 0</pose>
         <scale>1 1 1</scale>
-        <link name="link">
+        <link name='link'>
           <pose>0.252724 -0.228037 0 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
-      <model name="unit_box">
-        <pose>0 -1.26791 0.174955 0 -0 0</pose>
+      <model name='khm2'>
+        <pose>0.004096 0.008412 -0.211001 -0.000201 0.000998 1.54296</pose>
         <scale>1 1 1</scale>
-        <link name="link">
-          <pose>0 -1.26791 0.174955 0 -0 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
+        <link name='BL_wheel_link'>
+          <pose>0.145245 -0.140668 -0.310826 3.0666 0.000843 1.54297</pose>
+          <velocity>-3e-05 -0.000169 0.005361 0.000471 -0.000356 -0.000102</velocity>
+          <acceleration>0.046771 -0.057246 10.696 -2.22807 1.21464 -0.139349</acceleration>
+          <wrench>0.003239 -0.003964 0.740697 0 -0 0</wrench>
+        </link>
+        <link name='BR_wheel_link'>
+          <pose>0.153319 0.149208 -0.311116 -2.77193 0.001114 1.54298</pose>
+          <velocity>0.000765 -0.000291 -0.004171 -0.00177 -0.003296 -0.007771</velocity>
+          <acceleration>0.717139 -0.275294 -8.36992 1.46274 0.707357 3.015</acceleration>
+          <wrench>0.049662 -0.019064 -0.579617 0 -0 0</wrench>
+        </link>
+        <link name='FL_wheel_link'>
+          <pose>-0.145092 -0.132582 -0.310884 1.91546 0.000877 1.54296</pose>
+          <velocity>0.000132 0.00056 0.004073 -0.006435 0.001227 -0.00177</velocity>
+          <acceleration>0.344853 0.480076 8.19061 -0.391076 0.242632 1.47738</acceleration>
+          <wrench>0.023881 0.033245 0.5672 0 -0 0</wrench>
+        </link>
+        <link name='FR_wheel_link'>
+          <pose>-0.137019 0.157292 -0.311174 2.24307 0.001115 1.54292</pose>
+          <velocity>0.000782 0.000579 -0.005501 -0.001877 -0.004258 0.006025</velocity>
+          <acceleration>0.726478 0.543826 -10.9613 -0.079422 1.41266 -0.391978</acceleration>
+          <wrench>0.050309 0.03766 -0.759071 0 -0 0</wrench>
+        </link>
+        <link name='base_link'>
+          <pose>0.004096 0.008412 -0.211001 -0.000201 0.000998 1.54296</pose>
+          <velocity>0.000134 0.001872 -4e-06 -0.030634 -0.003376 -0.002276</velocity>
+          <acceleration>-0.072998 3.57906 0.000777 2.13726 0.181159 -1.36494</acceleration>
+          <wrench>-0.145997 7.15812 0.001555 0 -0 0</wrench>
         </link>
       </model>
-      <light name="sun">
+      <light name='sun'>
         <pose>2.80879 2.02825 10 0 -0 0</pose>
       </light>
     </state>
-    <gui fullscreen="0">
-      <camera name="user_camera">
-        <pose>-7.83868 2.66256 4.78995 -0 0.549797 -0.190998</pose>
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose>-1.23693 0.018679 1.16529 0 0.718553 -0.075473</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
     </gui>
-    <light name="sun" type="directional">
+    <light name='sun' type='directional'>
       <cast_shadows>1</cast_shadows>
       <pose>2.80879 2.02825 10 0 -0 0</pose>
       <diffuse>0.8 0.8 0.8 1</diffuse>
@@ -124,8 +139,8 @@
         <falloff>0</falloff>
       </spot>
     </light>
-    <model name="Floor">
-      <link name="link_0">
+    <model name='Floor'>
+      <link name='link_0'>
         <inertial>
           <mass>166.913</mass>
           <inertia>
@@ -139,7 +154,7 @@
           <pose>0 0 0 0 -0 0</pose>
         </inertial>
         <pose>0 -0 0 0 -0 0</pose>
-        <visual name="visual">
+        <visual name='visual'>
           <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <box>
@@ -152,12 +167,12 @@
               <uri>file://media/materials/scripts/gazebo.material</uri>
               <name>Gazebo/Grey</name>
             </script>
-            <shader type="pixel" />
+            <shader type='pixel'/>
           </material>
           <transparency>0</transparency>
           <cast_shadows>1</cast_shadows>
         </visual>
-        <collision name="collision">
+        <collision name='collision'>
           <laser_retro>0</laser_retro>
           <max_contacts>10</max_contacts>
           <pose>0 0 0 0 -0 0</pose>
@@ -219,6 +234,434 @@
       <static>1</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose>-0.010923 0.300375 -0.916015 0 -0 0</pose>
+    </model>
+    <model name='khm2'>
+      <link name='base_link'>
+        <inertial>
+          <pose>0 0 0 0 -0 0</pose>
+          <mass>2</mass>
+          <inertia>
+            <ixx>0.00830065</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.0224486</iyy>
+            <iyz>0</iyz>
+            <izz>0.0224486</izz>
+          </inertia>
+        </inertial>
+        <collision name='base_link_collision'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <box>
+              <size>0.333 0.16125 0.15428</size>
+            </box>
+          </geometry>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <friction>
+              <ode/>
+              <torsional>
+                <ode/>
+              </torsional>
+            </friction>
+            <bounce/>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        <visual name='base_link_visual'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <scale>1 1 1</scale>
+              <uri>/home/roselab/Desktop/khm2_ws/src/khm2_description/models/chassis.dae</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <gravity>1</gravity>
+        <sensor name='imu_sensor' type='imu'>
+          <always_on>1</always_on>
+          <update_rate>1000</update_rate>
+          <visualize>1</visualize>
+          <topic>imu</topic>
+          <plugin name='imu_plugin' filename='libgazebo_ros_imu_sensor.so'>
+            <topicName>imu</topicName>
+            <bodyName>base_link</bodyName>
+            <updateRateHZ>1000</updateRateHZ>
+            <gaussianNoise>0.0</gaussianNoise>
+            <xyzOffset>0 0 0</xyzOffset>
+            <rpyOffset>0 0 0</rpyOffset>
+            <frameName>base_link</frameName>
+            <initialOrientationAsReference>0</initialOrientationAsReference>
+            <robotNamespace>/</robotNamespace>
+          </plugin>
+          <pose>0 0 0 0 -0 0</pose>
+          <imu/>
+        </sensor>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <joint name='BL_TO_BASELINK' type='revolute'>
+        <pose relative_to='base_link'>-0.145 -0.145225 -0.1 0 -0 0</pose>
+        <parent>base_link</parent>
+        <child>BL_wheel_link</child>
+        <axis>
+          <xyz>1 0 0</xyz>
+          <limit>
+            <lower>-1e+16</lower>
+            <upper>1e+16</upper>
+          </limit>
+          <dynamics>
+            <spring_reference>0</spring_reference>
+            <spring_stiffness>0</spring_stiffness>
+          </dynamics>
+        </axis>
+        <physics>
+          <provide_feedback>1</provide_feedback>
+          <ode>
+            <limit>
+              <cfm>0</cfm>
+              <erp>0.2</erp>
+            </limit>
+            <provide_feedback>1</provide_feedback>
+          </ode>
+        </physics>
+        <sensor name='BL_force_torque' type='force_torque'>
+          <update_rate>1000</update_rate>
+          <force_torque/>
+        </sensor>
+      </joint>
+      <link name='BL_wheel_link'>
+        <pose relative_to='BL_TO_BASELINK'>0 0 0 0 -0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 -0 0</pose>
+          <mass>0.06925</mass>
+          <inertia>
+            <ixx>0.000310246</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.000310246</iyy>
+            <iyz>0</iyz>
+            <izz>0.000434336</izz>
+          </inertia>
+        </inertial>
+        <collision name='BL_wheel_link_collision'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <scale>1 1 1</scale>
+              <uri>/home/roselab/Desktop/khm2_ws/src/khm2_description/models/wheel_col.dae</uri>
+            </mesh>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='BL_wheel_link_visual'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <scale>1 1 1</scale>
+              <uri>/home/roselab/Desktop/khm2_ws/src/khm2_description/models/wheel.stl</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <joint name='BR_TO_BASELINK' type='revolute'>
+        <pose relative_to='base_link'>0.145 -0.145225 -0.1 0 -0 0</pose>
+        <parent>base_link</parent>
+        <child>BR_wheel_link</child>
+        <axis>
+          <xyz>1 0 0</xyz>
+          <limit>
+            <lower>-1e+16</lower>
+            <upper>1e+16</upper>
+          </limit>
+          <dynamics>
+            <spring_reference>0</spring_reference>
+            <spring_stiffness>0</spring_stiffness>
+          </dynamics>
+        </axis>
+        <physics>
+          <provide_feedback>1</provide_feedback>
+          <ode>
+            <limit>
+              <cfm>0</cfm>
+              <erp>0.2</erp>
+            </limit>
+            <provide_feedback>1</provide_feedback>
+          </ode>
+        </physics>
+        <sensor name='BR_force_torque' type='force_torque'>
+          <update_rate>1000</update_rate>
+          <force_torque/>
+        </sensor>
+      </joint>
+      <link name='BR_wheel_link'>
+        <pose relative_to='BR_TO_BASELINK'>0 0 0 0 -0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 -0 0</pose>
+          <mass>0.06925</mass>
+          <inertia>
+            <ixx>0.000310246</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.000310246</iyy>
+            <iyz>0</iyz>
+            <izz>0.000434336</izz>
+          </inertia>
+        </inertial>
+        <collision name='BR_wheel_link_collision'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <scale>1 1 1</scale>
+              <uri>/home/roselab/Desktop/khm2_ws/src/khm2_description/models/wheel_col.dae</uri>
+            </mesh>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='BR_wheel_link_visual'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <scale>1 1 1</scale>
+              <uri>/home/roselab/Desktop/khm2_ws/src/khm2_description/models/wheel.stl</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <joint name='FL_TO_BASELINK' type='revolute'>
+        <pose relative_to='base_link'>-0.145 0.145225 -0.1 0 -0 0</pose>
+        <parent>base_link</parent>
+        <child>FL_wheel_link</child>
+        <axis>
+          <xyz>1 0 0</xyz>
+          <limit>
+            <lower>-1e+16</lower>
+            <upper>1e+16</upper>
+          </limit>
+          <dynamics>
+            <spring_reference>0</spring_reference>
+            <spring_stiffness>0</spring_stiffness>
+          </dynamics>
+        </axis>
+        <physics>
+          <provide_feedback>1</provide_feedback>
+          <ode>
+            <limit>
+              <cfm>0</cfm>
+              <erp>0.2</erp>
+            </limit>
+            <provide_feedback>1</provide_feedback>
+          </ode>
+        </physics>
+        <sensor name='FL_force_torque' type='force_torque'>
+          <update_rate>1000</update_rate>
+          <force_torque/>
+        </sensor>
+      </joint>
+      <link name='FL_wheel_link'>
+        <pose relative_to='FL_TO_BASELINK'>0 0 0 0 -0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 -0 0</pose>
+          <mass>0.06925</mass>
+          <inertia>
+            <ixx>0.000310246</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.000310246</iyy>
+            <iyz>0</iyz>
+            <izz>0.000434336</izz>
+          </inertia>
+        </inertial>
+        <collision name='FL_wheel_link_collision'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <scale>1 1 1</scale>
+              <uri>/home/roselab/Desktop/khm2_ws/src/khm2_description/models/wheel_col.dae</uri>
+            </mesh>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='FL_wheel_link_visual'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <scale>1 1 1</scale>
+              <uri>/home/roselab/Desktop/khm2_ws/src/khm2_description/models/wheel.stl</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <joint name='FR_TO_BASELINK' type='revolute'>
+        <pose relative_to='base_link'>0.145 0.145225 -0.1 0 -0 0</pose>
+        <parent>base_link</parent>
+        <child>FR_wheel_link</child>
+        <axis>
+          <xyz>1 0 0</xyz>
+          <limit>
+            <lower>-1e+16</lower>
+            <upper>1e+16</upper>
+          </limit>
+          <dynamics>
+            <spring_reference>0</spring_reference>
+            <spring_stiffness>0</spring_stiffness>
+          </dynamics>
+        </axis>
+        <physics>
+          <provide_feedback>1</provide_feedback>
+          <ode>
+            <limit>
+              <cfm>0</cfm>
+              <erp>0.2</erp>
+            </limit>
+            <provide_feedback>1</provide_feedback>
+          </ode>
+        </physics>
+        <sensor name='FR_force_torque' type='force_torque'>
+          <update_rate>1000</update_rate>
+          <force_torque/>
+        </sensor>
+      </joint>
+      <link name='FR_wheel_link'>
+        <pose relative_to='FR_TO_BASELINK'>0 0 0 0 -0 0</pose>
+        <inertial>
+          <pose>0 0 0 0 -0 0</pose>
+          <mass>0.06925</mass>
+          <inertia>
+            <ixx>0.000310246</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.000310246</iyy>
+            <iyz>0</iyz>
+            <izz>0.000434336</izz>
+          </inertia>
+        </inertial>
+        <collision name='FR_wheel_link_collision'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <scale>1 1 1</scale>
+              <uri>/home/roselab/Desktop/khm2_ws/src/khm2_description/models/wheel_col.dae</uri>
+            </mesh>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='FR_wheel_link_visual'>
+          <pose>0 0 0 0 -0 0</pose>
+          <geometry>
+            <mesh>
+              <scale>1 1 1</scale>
+              <uri>/home/roselab/Desktop/khm2_ws/src/khm2_description/models/wheel.stl</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <static>0</static>
+      <plugin name='gazebo_ros_control' filename='libgazebo_ros_control.so'>
+        <updateRate>1000.0</updateRate>
+        <updateRateHZ>1000.0</updateRateHZ>
+        <robotNamespace>/</robotNamespace>
+      </plugin>
+      <plugin name='p3d_base_controller' filename='libgazebo_ros_p3d.so'>
+        <alwaysOn>1</alwaysOn>
+        <updateRate>1000.0</updateRate>
+        <updateRateHZ>1000.0</updateRateHZ>
+        <bodyName>base_link</bodyName>
+        <topicName>odom</topicName>
+        <gaussianNoise>0</gaussianNoise>
+        <frameName>world</frameName>
+        <xyzOffsets>0 0 0</xyzOffsets>
+        <rpyOffsets>0 0 0</rpyOffsets>
+        <robotNamespace>/</robotNamespace>
+      </plugin>
+      <plugin name='FL_TO_BASELINK_ft_sensor' filename='libgazebo_ros_ft_sensor.so'>
+        <updateRate>1000.0</updateRate>
+        <topicName>front_left_torque</topicName>
+        <jointName>FL_TO_BASELINK</jointName>
+        <robotNamespace>/</robotNamespace>
+      </plugin>
+      <plugin name='FR_TO_BASELINK_ft_sensor' filename='libgazebo_ros_ft_sensor.so'>
+        <updateRate>1000.0</updateRate>
+        <topicName>front_right_torque</topicName>
+        <jointName>FR_TO_BASELINK</jointName>
+        <robotNamespace>/</robotNamespace>
+      </plugin>
+      <plugin name='BL_TO_BASELINK_ft_sensor' filename='libgazebo_ros_ft_sensor.so'>
+        <updateRate>1000.0</updateRate>
+        <topicName>back_left_torque</topicName>
+        <jointName>BL_TO_BASELINK</jointName>
+        <robotNamespace>/</robotNamespace>
+      </plugin>
+      <plugin name='BR_TO_BASELINK_ft_sensor' filename='libgazebo_ros_ft_sensor.so'>
+        <updateRate>1000.0</updateRate>
+        <topicName>back_right_torque</topicName>
+        <jointName>BR_TO_BASELINK</jointName>
+        <robotNamespace>/</robotNamespace>
+      </plugin>
+      <pose>0 -1 0.041616 0.15708 -0 0</pose>
     </model>
   </world>
 </sdf>

@@ -113,7 +113,10 @@ for file in os.listdir(path):
     fr_torque_df = pd.read_csv(csv_path_partial + "_front_right_torque.csv")
     bl_torque_df = pd.read_csv(csv_path_partial + "_back_left_torque.csv")
     br_torque_df = pd.read_csv(csv_path_partial + "_back_right_torque.csv")
-    steady_state_time_df = pd.read_csv(csv_path_partial + "_steady_state_time.csv")
+    try:
+        steady_state_time_df = pd.read_csv(csv_path_partial + "_steady_state_time.csv")
+    except:
+        steady_state_time_df = pd.DataFrame({"%time": [0.4]}, index=[0])
 
     # ============= model_states csv needs special processing ===============
     # find the index of the rover

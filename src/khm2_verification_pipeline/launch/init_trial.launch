@@ -4,6 +4,7 @@
     <!-- call nodes that load gazebo, rover, and soil based on trial config -->
     <!-- load trial parameters -->
     <rosparam command="load" file="$(find khm2_verification_pipeline)/config/trial_params.yaml"/>
+    <node name="set_floor_rotation_node" pkg="khm2_verification_pipeline" type="set_floor_rotation.py" output="screen"/>
     <include file="$(find khm2_bringup)/launch/simulation.launch"/>
     <include file="$(find khm2_bringup)/launch/rover.launch"/>
 

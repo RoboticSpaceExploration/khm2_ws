@@ -317,12 +317,11 @@ for file in os.listdir(path):
     cadre_data, degrees_mapped_files = analysis.get_cadre_files()
     # get all data related to 0 degree inclination
     deg0_files = [file for file in cadre_data.keys() if degrees_mapped_files[file] == 0]
-    print(deg0_files)
 
     # degree 0 trial cadre
     trial = cadre_data[deg0_files[0]]
     rover_time_cut = trial.rover_time_cut
-    # downsample rover data to nearest cadre time stamp
+
     
     # create figure for plots
     fig = plt.figure(figsize=(20,10))
@@ -372,9 +371,11 @@ for file in os.listdir(path):
     lin_vel_local = []
     ang_vel_local = []
     for i, rot in enumerate(rotations):
-        lin_vel_local.append(np.matmul(np.linalg.inv(rot), np.concatenate((lin_vel_world[i], [1]))))
-        # lin_vel_local.append(np.matmul(np.linalg.inv(rot), temp_vel))
+        # lin_vel_local.append(np.matmul(np.linalg.inv(rot), np.concatenate((lin_vel_world[i], [1]))))
+        lin_vel_local.append(np.dot(rot, np.concatenate((lin_vel_world[i], [1]))))
         ang_vel_local.append(np.matmul(np.linalg.inv(rot), np.concatenate((ang_vel_world[i], [1]))))
+    # print(lin_vel_world[30:60])
+    # print(np.array(lin_vel_local[30:60]))
 
     # indexes 0=x, 1=y, 2=z
     lin_vel_x_local = np.transpose(lin_vel_local)[0]
@@ -392,6 +393,37 @@ for file in os.listdir(path):
     rotation = rotation_matrix(np.pi / 2, [0, 0, 1], [0, 0, 0])
     sim_pos_final = np.matmul(np.linalg.inv(rotation), np.array([sim_centered_pos_x, sim_centered_pos_y, sim_centered_pos_z, [1 for p in sim_centered_pos_x]]))
     cad_pos_final = np.transpose(np.array([cad_centered_pos_x, cad_centered_pos_y, cad_centered_pos_z]))
+
+    # CALCULATE CADRE ROVER VELOCITIES USING POSITION
+    def component_velocity(x1, t1, x2, t2):
+        return (x2 - x1) / (t2 - t1)
+
+    cad_vel_x = [0]
+    cad_vel_y = [0]
+    cad_vel_z = [0]
+    pos_vec = np.transpose(np.array([cad_centered_pos_x, cad_centered_pos_y, cad_centered_pos_z]))
+    for i, pos in enumerate(pos_vec):
+        if i == 0:
+            continue
+        vel_x = component_velocity(pos_vec[i-1][0], rover_time_cut[i-1], pos_vec[i][0], rover_time_cut[i])
+        vel_y = component_velocity(pos_vec[i-1][1], rover_time_cut[i-1], pos_vec[i][1], rover_time_cut[i])
+        vel_z = component_velocity(pos_vec[i-1][2], rover_time_cut[i-1], pos_vec[i][2], rover_time_cut[i])
+        cad_vel_x.append(vel_x)
+        cad_vel_y.append(vel_y)
+        cad_vel_z.append(vel_z)
+    cad_vel_vec = np.array([cad_vel_x, cad_vel_y, cad_vel_z])
+
+    ax2 = fig.add_subplot(3,3,6)
+    ax2.plot(rover_time_cut, cad_vel_vec[0], label='velocity_x')
+    ax2 = fig.add_subplot(3,3,6)
+    ax2.plot(rover_time_cut, cad_vel_vec[1], label='velocity_y')
+    ax2 = fig.add_subplot(3,3,6)
+    ax2.plot(rover_time_cut, cad_vel_vec[2], label='velocity_z')
+    plt.xlabel('time [sec]')
+    plt.ylabel('velocity [m/s]')
+    plt.title('velocity [m/s] of Simulated Rover over time [s]')
+    plt.legend()
+    plt.autoscale()
     
     ax2 = fig.add_subplot(3,3,1)
     ax2.plot(rover_time_cut, sim_pos_final[0], label='position_x')
@@ -451,18 +483,21 @@ for file in os.listdir(path):
     plt.autoscale()
 
     # CALCULATE RMSE OF POSITION AND ORIENTATION
-    # forward in sim currently is -y in world space, should conduct tests such that +x is forward in world space
-    # forward in cadre is +x in world space, left right = y, up down = z
+    # rover's forward is -y in world space, should conduct tests such that +x is forward in world space
+    # cadre's forward is +x in world space, left right = y, up down = z
+    def rmse(expected, actual):
+        return np.sqrt(np.square(np.subtract(expected, actual)).mean())
+
     # RMSE of position
-    temp_sim_pos_final = np.transpose(sim_pos_final[:3])
-    rmse_position = np.sqrt(np.mean(np.sum((temp_sim_pos_final - cad_pos_final) ** 2)))
-    rmse_position = np.sqrt(np.square(np.subtract(cad_pos_final, temp_sim_pos_final)).mean())
+    sim_pos_final_vec3 = np.transpose(sim_pos_final[:3]) # remove the 1s at the end
+    rmse_position = rmse(cad_pos_final, sim_pos_final_vec3)
     print(f"RMSE of position: {rmse_position}")
 
     # RMSE of orientation
-
-
-
+    sim_rotation_vec4 = np.transpose(np.array([sim_rot_x, sim_rot_y, sim_rot_z, sim_rot_w]))
+    cad_rotation_vec4 = np.transpose(np.array([cad_rotation_x, cad_rotation_y, cad_rotation_z, cad_rotation_w]))
+    rmse_rotation = rmse(cad_rotation_vec4, sim_rotation_vec4)
+    print(f"RMSE of rotation: {rmse_rotation}")
 
     # CALCULATE SLIP RATIOS
     # negative because urdf is messed up and need to flip the direction that the wheels spin
@@ -471,26 +506,52 @@ for file in os.listdir(path):
     front_right_vel = downsample(rover_time_cut, joint_states_time, joint_states_df["front_right_velocity"].to_numpy())
     back_left_vel = downsample(rover_time_cut, joint_states_time, joint_states_df["back_left_velocity"].to_numpy())
     back_right_vel = downsample(rover_time_cut, joint_states_time, joint_states_df["back_right_velocity"].to_numpy())
-    # clip the slip ratios to be between -1 and 1, calculate slip ratio s = 1 - (lin_velocity / angular_velocity * radius)
-    fl_slip = np.clip([1 - (-lin_vel[1] / front_left_vel[i]) for i, lin_vel in enumerate(lin_vel_local)], -1, 1)
-    fr_slip = np.clip([1 - (-lin_vel[1] / front_right_vel[i]) for i, lin_vel in enumerate(lin_vel_local)], -1, 1)
-    bl_slip = np.clip([1 - (-lin_vel[1] / back_left_vel[i]) for i, lin_vel in enumerate(lin_vel_local)], -1, 1)
-    br_slip = np.clip([1 - (-lin_vel[1] / back_right_vel[i]) for i, lin_vel in enumerate(lin_vel_local)], -1, 1)
+    # clamp the slip ratios to be between -1 and 1, calculate slip ratio s = 1 - (lin_velocity / angular_velocity * radius)
 
-    ax2 = fig.add_subplot(3,3,3)
+    # fl_slip = []
+    # fr_slip = []
+    # bl_slip = []
+    # br_slip = []
+    # for lin_vel in lin_vel_local:
+    #     epsilon = 0.001
+    #     if lin_vel < epsilon:
+
+
+    epsilon = 0.005 # less than 0.005 m/s considered not moving
+    # for i, lin_vel in enumerate(lin_vel_local):
+    #     if abs(lin_vel[1]) < epsilon:
+    #         lin_vel_local[i][1] = 0
+    fl_slip = []
+    fr_slip = []
+    bl_slip = []
+    br_slip = []
+    for i, lin_vel in enumerate(lin_vel_local):
+        vel = -lin_vel[1] if abs(lin_vel[1]) > epsilon else 0 # forward in local space
+        temp_fr_slip = 1-(vel/front_left_vel[i])
+        temp_fl_slip = 1-(vel/front_right_vel[i])
+        temp_bl_slip = 1-(vel/back_left_vel[i])
+        temp_br_slip = 1-(vel/back_right_vel[i])
+        fl_slip.append(temp_fl_slip)
+        fr_slip.append(temp_fr_slip)
+        bl_slip.append(temp_bl_slip)
+        br_slip.append(temp_br_slip)
+    # fr_slip = np.clip([1 - (-lin_vel[1] / front_right_vel[i]) for i, lin_vel in enumerate(lin_vel_local)], -1, 1)
+    # fr_slip = np.clip([1 - (-lin_vel[1] / front_right_vel[i]) for i, lin_vel in enumerate(lin_vel_local)], -1, 1)
+    # bl_slip = np.clip([1 - (-lin_vel[1] / back_left_vel[i]) for i, lin_vel in enumerate(lin_vel_local)], -1, 1)
+    # br_slip = np.clip([1 - (-lin_vel[1] / back_right_vel[i]) for i, lin_vel in enumerate(lin_vel_local)], -1, 1)
+
+    ax2 = fig.add_subplot(3,3,7)
     ax2.plot(rover_time_cut, fl_slip, label='front left wheel slip ratio')
-    ax2 = fig.add_subplot(3,3,3)
+    ax2 = fig.add_subplot(3,3,7)
     ax2.plot(rover_time_cut, fr_slip, label='front right wheel slip ratio')
-    ax2 = fig.add_subplot(3,3,3)
+    ax2 = fig.add_subplot(3,3,7)
     ax2.plot(rover_time_cut, bl_slip, label='back left wheel slip ratio')
-    ax2 = fig.add_subplot(3,3,3)
+    ax2 = fig.add_subplot(3,3,7)
     ax2.plot(rover_time_cut, br_slip, label='back right wheel slip ratio')
-    plt.legend()
-    plt.autoscale()
     plt.xlabel('time [sec]')
     plt.ylabel('slip ratio')
-
-    print()
+    plt.autoscale()
+    plt.legend()
 
     plt.tight_layout()
     plt.show()

@@ -11,13 +11,15 @@ import os
 # GLOBAL STATE
 rospack = rospkg.RosPack()
 # load trial params from json
-with open(os.path.join(rospack.get_path('khm2_verification_pipeline'), 'data/trial_params.json'), 'r') as json_file:
+data_path = os.path.join(rospack.get_path('khm2_verification_pipeline'), 'data/trial_params.json')
+with open(data_path, 'r') as json_file:
     trial_params = json.load(json_file)
 # read trial parameters
 cadre_file_name = rospy.get_param('/current_trial_file_name', 'no_cadre_file_name')
 time = trial_params[cadre_file_name]["time_elapsed"] # s
 speed = trial_params[cadre_file_name]["target_speed"] # m/s
 angle = trial_params[cadre_file_name]["angle"] # degrees
+
 
 already_reached_steady_state = False
 steady_state_time = rospy.Publisher("/steady_state_time", Float32, queue_size=10, latch=True)
@@ -72,3 +74,15 @@ if __name__ == "__main__":
         rate.sleep()
 
     # rosbag record automatically closes when script finishes executing
+    # record rosbag file to cadre trial mapping
+    if not os.path.isfile(os.path.join(data_path, 'sim_trial_to_cadre_trial.json')):
+        sim_trial_to_cadre_trial = {}
+    else:
+        sim_trial_to_cadre_trial = json.load(open(os.path.join(data_path, 'sim_trial_to_cadre_trial.json'), 'r'))
+    # look for rosbag 
+    for file in os.listdir(data_path):
+        if file.endswith('.active'):
+            sim_trial_to_cadre_trial[file_name] = cadre_file_name
+            json.dump(sim_trial_to_cadre_trial, open(os.path.join(data_path, 'sim_trial_to_cadre_trial.json'), 'w'))
+            rospy.loginfo(f"Recorded sim trial {file_name} to cadre trial {cadre_file_name}")
+            break

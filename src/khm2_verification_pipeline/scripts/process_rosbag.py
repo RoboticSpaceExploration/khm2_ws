@@ -9,6 +9,7 @@ from tf.transformations import quaternion_matrix, quaternion_multiply, quaternio
 import analysis
 import math
 import warnings
+import json
 
 # NOTE: ctrl+f for "adjust" to find all the places where postprocessing was done due to coordinate system misalignments or sign flips
 
@@ -16,17 +17,17 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 rospack = rospkg.RosPack()
 
-path = None
+data_path_dir = None
 if (len(sys.argv) != 2):
     print("Default output directory: khm2_ws/src/khm2_verification_pipeline/data")
-    path = os.path.join(rospack.get_path('khm2_verification_pipeline'), 'data')
-    print(path)
+    data_path_dir = os.path.join(rospack.get_path('khm2_verification_pipeline'), 'data')
+    print(data_path_dir)
     # sys.exit(1)
 elif not os.path.isdir(sys.argv[1]):
     print("Error: <folder_with_bag_files> must be a folder")
     sys.exit(1)
 else:
-    path = os.path.abspath(sys.argv[1])
+    data_path_dir = os.path.abspath(sys.argv[1])
 
 # need this class for pickle, why so big
 class data:
@@ -64,7 +65,8 @@ def process_robsag(file):
     if not file.endswith(".bag"):
         print(f'File: {file} | is not a bag file')
         return
-    file_path = os.path.join(path, file)
+    file_path = os.path.join(data_path_dir, file)
+    file_name = os.path.basename(file_path)
     file_name_no_ext = str.rstrip(os.path.basename(file_path), ".bag")
     output_dir_path = f"{os.path.dirname(file_path)}/{file_name_no_ext}_csv"
     extension = file.split(".")[-1]
@@ -307,10 +309,10 @@ def process_robsag(file):
 
     cadre_data, degrees_mapped_files = analysis.get_cadre_files()
     # get all data related to 0 degree inclination
-    deg0_files = [file for file in cadre_data.keys() if degrees_mapped_files[file] == 0]
 
-    # degree 0 trial cadre
-    cadre_file = deg0_files[0]
+    with open(os.path.join(data_path_dir, file_name)) as file:
+        sim_trial_to_cadre_trial = json.load(file)
+    cadre_file = sim_trial_to_cadre_trial[file_name]
     trial = cadre_data[cadre_file]
     rover_time_cut = trial.rover_time_cut
     
@@ -656,7 +658,7 @@ def process_robsag(file):
     plt.tight_layout()
     plt.show()
 
-for file in os.listdir(path):
+for file in os.listdir(data_path_dir):
     if file.endswith('.bag'):
         process_robsag(file)
 

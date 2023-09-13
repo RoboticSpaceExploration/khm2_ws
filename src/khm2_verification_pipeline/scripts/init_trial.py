@@ -35,6 +35,7 @@ except:
 
 # print out the cadre files
 def pretty_print_list(l):
+    l.sort()
     col_width = max(len(word) for word in l) + 2  # padding
     max_per_col = 3
     i = 0

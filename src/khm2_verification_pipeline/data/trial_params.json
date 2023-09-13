@@ -1,0 +1,247 @@
+{
+    "11-15_0DEG1_rover_cut1_refined.p": {
+        "time_elapsed": 6.843999999999994,
+        "angle": 0,
+        "target_speed": 0.09336921260918189
+    },
+    "11-15_0DEG1_rover_cut2_refined.p": {
+        "time_elapsed": 22.75,
+        "angle": 0,
+        "target_speed": 0.09381737774193999
+    },
+    "11-15_0DEG1_rover_cut3_refined.p": {
+        "time_elapsed": 7.07000000000005,
+        "angle": 0,
+        "target_speed": 0.0935616896061073
+    },
+    "11-15_0DEG1_rover_cut4_refined.p": {
+        "time_elapsed": 18.951000000000022,
+        "angle": 0,
+        "target_speed": 0.0938097768486034
+    },
+    "11-15_10DEG1_rover_cut1_refined.p": {
+        "time_elapsed": 6.103999999999985,
+        "angle": 10,
+        "target_speed": 0.09294323045812644
+    },
+    "11-15_10DEG1_rover_cut2_refined.p": {
+        "time_elapsed": 21.174000000000007,
+        "angle": 10,
+        "target_speed": 0.09351432266055196
+    },
+    "11-15_10DEG1_rover_cut3_refined.p": {
+        "time_elapsed": 24.59499999999997,
+        "angle": 10,
+        "target_speed": 0.0754286435995262
+    },
+    "11-15_10DEG1_rover_cut4_refined.p": {
+        "time_elapsed": 5.523000000000025,
+        "angle": 10,
+        "target_speed": 0.07522250652729891
+    },
+    "11-15_10DEG1_rover_cut5_refined.p": {
+        "time_elapsed": 2.459000000000003,
+        "angle": 10,
+        "target_speed": 0.07480070810213955
+    },
+    "11-15_10DEG1_rover_cut6_refined.p": {
+        "time_elapsed": 6.2339999999999804,
+        "angle": 10,
+        "target_speed": 0.09294634076878294
+    },
+    "11-15_10DEG1_rover_cut7_refined.p": {
+        "time_elapsed": 20.733000000000004,
+        "angle": 10,
+        "target_speed": 0.0934761183600393
+    },
+    "11-15_10DEG1_rover_cut8_refined.p": {
+        "time_elapsed": 30.971000000000004,
+        "angle": 10,
+        "target_speed": 0.07579251879499026
+    },
+    "11-15_30DEG2_rover_cut1_refined.p": {
+        "time_elapsed": 38.727999999999994,
+        "angle": 30,
+        "target_speed": 0.09398284376053295
+    },
+    "11-15_30DEG2_rover_cut2_refined.p": {
+        "time_elapsed": 51.41000000000001,
+        "angle": 30,
+        "target_speed": 0.09405643905442064
+    },
+    "11-15_30DEG2_rover_cut3_refined.p": {
+        "time_elapsed": 47.66399999999999,
+        "angle": 30,
+        "target_speed": 0.0940405064581665
+    },
+    "11-15_30DEG2_rover_cut4_refined.p": {
+        "time_elapsed": 38.47900000000001,
+        "angle": 30,
+        "target_speed": 0.09399638980997446
+    },
+    "11-15_5DEG1_rover_cut1_refined.p": {
+        "time_elapsed": 6.572000000000003,
+        "angle": 5,
+        "target_speed": 0.09304115778306002
+    },
+    "11-15_5DEG1_rover_cut2_refined.p": {
+        "time_elapsed": 19.683999999999997,
+        "angle": 5,
+        "target_speed": 0.09326052291217189
+    },
+    "11-15_5DEG1_rover_cut3_refined.p": {
+        "time_elapsed": 31.23599999999996,
+        "angle": 5,
+        "target_speed": 0.0751228406688576
+    },
+    "11-15_5DEG1_rover_cut4_refined.p": {
+        "time_elapsed": 2.84699999999998,
+        "angle": 5,
+        "target_speed": 0.09183541595753357
+    },
+    "11-15_5DEG1_rover_cut5_refined.p": {
+        "time_elapsed": 2.002999999999986,
+        "angle": 5,
+        "target_speed": 0.07374527517841288
+    },
+    "11-15_5DEG1_rover_cut6_refined.p": {
+        "time_elapsed": 6.362000000000023,
+        "angle": 5,
+        "target_speed": 0.0747474712922722
+    },
+    "11-15_5DEG1_rover_cut7_refined.p": {
+        "time_elapsed": 6.364000000000033,
+        "angle": 5,
+        "target_speed": 0.09325883977059472
+    },
+    "11-15_5DEG1_rover_cut8_refined.p": {
+        "time_elapsed": 20.601999999999975,
+        "angle": 5,
+        "target_speed": 0.09376694057246987
+    },
+    "11-15_5DEG1_rover_cut9_refined.p": {
+        "time_elapsed": 31.872000000000014,
+        "angle": 5,
+        "target_speed": 0.07577905538455484
+    },
+    "11-16_15DEG2_cut1_refined.p": {
+        "time_elapsed": 7.009999999999998,
+        "angle": 15,
+        "target_speed": 0.09178821790457108
+    },
+    "11-16_15DEG2_cut2_refined.p": {
+        "time_elapsed": 26.104,
+        "angle": 15,
+        "target_speed": 0.09244128412118717
+    },
+    "11-16_15DEG2_cut3_refined.p": {
+        "time_elapsed": 30.119,
+        "angle": 15,
+        "target_speed": 0.07683919732038572
+    },
+    "11-16_15DEG2_cut4_refined.p": {
+        "time_elapsed": 7.627999999999986,
+        "angle": 15,
+        "target_speed": 0.09287885796156403
+    },
+    "11-16_15DEG2_cut5_refined.p": {
+        "time_elapsed": 23.323000000000008,
+        "angle": 15,
+        "target_speed": 0.09322858066039376
+    },
+    "11-16_15DEG2_cut6_refined.p": {
+        "time_elapsed": 29.153999999999996,
+        "angle": 15,
+        "target_speed": 0.07573355977893989
+    },
+    "11-21_27DEG1_cut1_refined.p": {
+        "time_elapsed": 11.163999999999987,
+        "angle": 27,
+        "target_speed": 0.09106233910666639
+    },
+    "11-21_27DEG1_cut2_refined.p": {
+        "time_elapsed": 100.99100000000001,
+        "angle": 27,
+        "target_speed": 0.09316970568546126
+    },
+    "11-21_27DEG1_cut3_refined.p": {
+        "time_elapsed": 15.928999999999974,
+        "angle": 27,
+        "target_speed": 0.09449778697826293
+    },
+    "11-21_27DEG1_cut4_refined.p": {
+        "time_elapsed": 10.121999999999957,
+        "angle": 27,
+        "target_speed": 0.09112576295129865
+    },
+    "11-21_27DEG1_cut5_refined.p": {
+        "time_elapsed": 112.33699999999999,
+        "angle": 27,
+        "target_speed": 0.09352320610046588
+    },
+    "20DEG1_cut1_refined.p": {
+        "time_elapsed": 9.766000000000002,
+        "angle": 20,
+        "target_speed": 0.09323209507068764
+    },
+    "20DEG1_cut2_refined.p": {
+        "time_elapsed": 39.778999999999996,
+        "angle": 20,
+        "target_speed": 0.09354923649237268
+    },
+    "20DEG1_cut3_refined.p": {
+        "time_elapsed": 30.61499999999998,
+        "angle": 20,
+        "target_speed": 0.07570494997490264
+    },
+    "20DEG1_cut4_refined.p": {
+        "time_elapsed": 9.454000000000008,
+        "angle": 20,
+        "target_speed": 0.09324340922238974
+    },
+    "20DEG1_cut5_refined.p": {
+        "time_elapsed": 39.872000000000014,
+        "angle": 20,
+        "target_speed": 0.09362477880780748
+    },
+    "20DEG1_cut6_refined.p": {
+        "time_elapsed": 32.589,
+        "angle": 20,
+        "target_speed": 0.0754793199343485
+    },
+    "25DEG1_cut1_refined.p": {
+        "time_elapsed": 9.851999999999997,
+        "angle": 25,
+        "target_speed": 0.09326201644586295
+    },
+    "25DEG1_cut2_refined.p": {
+        "time_elapsed": 84.54999999999998,
+        "angle": 25,
+        "target_speed": 0.09375620597130288
+    },
+    "25DEG1_cut3_refined.p": {
+        "time_elapsed": 27.061000000000007,
+        "angle": 25,
+        "target_speed": 0.07571695367506201
+    },
+    "25DEG1_cut4_refined.p": {
+        "time_elapsed": 9.442999999999984,
+        "angle": 25,
+        "target_speed": 0.09331092888216473
+    },
+    "25DEG1_cut5_refined.p": {
+        "time_elapsed": 3.0930000000000177,
+        "angle": 25,
+        "target_speed": 0.09247626868315832
+    },
+    "25DEG1_cut6_refined.p": {
+        "time_elapsed": 96.83600000000001,
+        "angle": 25,
+        "target_speed": 0.09373565304557636
+    },
+    "25DEG1_cut7_refined.p": {
+        "time_elapsed": 29.80699999999996,
+        "angle": 25,
+        "target_speed": 0.07565940661271733
+    }
+}

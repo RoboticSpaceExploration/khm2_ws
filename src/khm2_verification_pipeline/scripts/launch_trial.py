@@ -1,30 +1,29 @@
 #!/usr/bin/env python3
 import rospy
+import rospkg
+import roslaunch
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float32
 from sensor_msgs.msg import JointState
-import roslaunch
+import json
+import os
 
 # GLOBAL STATE
+rospack = rospkg.RosPack()
+# load trial params from json
+with open(os.path.join(rospack.get_path('khm2_verification_pipeline'), 'data/trial_params.json'), 'r') as json_file:
+    trial_params = json.load(json_file)
 # read trial parameters
-cadre_file_name = rospy.get_param('/trial_params/cadre_file_name', 'no_cadre_file_name')
-time = rospy.get_param('/trial_params/time', 10) # s
-speed = rospy.get_param('/trial_params/speed', 4) # cm/s
-angle = rospy.get_param('/trial_params/angle', 0) # degrees
-if time == None:
-    rospy.set_param('/trial_params/time', 15)
-    time = 15
-if speed == None:
-    rospy.set_param('/trial_params/speed', 4)
-    speed = 6
-if angle == None:
-    rospy.set_param('/trial_params/angle', 0)
-    angle = 0
+cadre_file_name = rospy.get_param('/current_trial_file_name', 'no_cadre_file_name')
+time = trial_params[cadre_file_name]["time_elapsed"] # s
+speed = trial_params[cadre_file_name]["target_speed"] # m/s
+angle = trial_params[cadre_file_name]["angle"] # degrees
+
 already_reached_steady_state = False
 steady_state_time = rospy.Publisher("/steady_state_time", Float32, queue_size=10, latch=True)
 joint_state_time = 0
 
-# ===== START ROSLAUNCH SETUP
+# =================== START ROSLAUNCH SETUP =================
 file_name = f"sim_{angle}DEG"
 # launch rosbag record and close when node is done with trial
 rosbag_pkg = 'rosbag'
@@ -36,7 +35,7 @@ launch.start()
 
 rosbag_process = launch.launch(rosbag_node)
 rospy.loginfo("started rosbag record node")
-# ====== END ROSLAUNCH SETUP
+# =================== END ROSLAUNCH SETUP ===============
 
 def shutdown_node(event):
     rospy.signal_shutdown("Trial complete")
@@ -50,28 +49,26 @@ def joint_states_callback(msg):
     if not already_reached_steady_state:
         if msg.velocity[0] > speed * 0.95 and msg.velocity[1] > speed * 0.95 and msg.velocity[2] > speed * 0.95 and msg.velocity[3] > speed * 0.95:
             rospy.loginfo("Reached steady state")
+            rospy.Timer(rospy.Duration(secs=time), shutdown_node) # start timer from steady state
             already_reached_steady_state = True
             rospy.Timer(rospy.Duration(secs=1), steady_state_timer_callback, oneshot=True)
 
-def main():
+if __name__ == "__main__":
     rospy.init_node('run_trial_node')
 
     joint_states_sub = rospy.Subscriber("/joint_states", JointState, joint_states_callback)
     cmd_vel_pub = rospy.Publisher("/robot1_velocity_controller/cmd_vel", Twist, queue_size=100)
 
-    timer = rospy.Timer(rospy.Duration(secs=time), shutdown_node)
     rospy.loginfo("Starting trial...")
     rospy.loginfo(f"Trial duration: {time} seconds")
     rospy.loginfo(f"Rover speed: {speed} cm/s")
     rospy.loginfo(f"Angle: {angle} degrees")
 
+    rate = rospy.Rate(1000)
     while not rospy.is_shutdown():
         msg = Twist()
-        msg.linear.x = speed / 100 # convert cm/s to m/s
+        msg.linear.x = speed # m/s
         cmd_vel_pub.publish(msg)
+        rate.sleep()
 
     # rosbag record automatically closes when script finishes executing
-    
-
-if __name__ == '__main__':
-    main()

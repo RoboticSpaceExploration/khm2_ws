@@ -44,7 +44,7 @@ def get_cadre_data(file, path):
 # access each file by degrees with 
 # deg0 = [file for file in files.keys() if files[file] == 0]
 def get_cadre_files() -> (Dict[str, data], Dict[str, int]):
-    path = rospkg.RosPack().get_path('khm2_verification_pipeline') + '/data/cut_data'
+    path = os.path.join(rospkg.RosPack().get_path('khm2_verification_pipeline'), 'data/cut_data')
     files = {}
     for file_name in os.listdir(path):
         if file_name.endswith(".p"):

@@ -78,8 +78,8 @@ tree.write(world_file_path)
 rover_launch_file = os.path.join(rospack.get_path('khm2_bringup'), 'launch/rover.launch')
 with open(rover_launch_file, 'r') as file:
     rover_launch_file_text = file.read()
-    replacement = f'<arg name="rr" value="{radians}"/>'
-    pattern = re.compile(r'<arg name="rr" value=".*"/>')
+    replacement = f'<arg name="rp" value="{radians}"/>'
+    pattern = re.compile(r'<arg name="rp" value=".*"/>')
     rover_launch_file_text = re.sub(pattern, replacement, rover_launch_file_text)
 
 # =================================

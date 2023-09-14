@@ -222,6 +222,12 @@ def process_robsag(file):
 
     all_dfs = [state_df, imu_df, joint_states_df, fl_torque_df, fr_torque_df, bl_torque_df, br_torque_df]
 
+    # ========= STEADY STATE TIME CALCULATION, CUT ALL DATA BEFORE =========
+    steady_state_time = (steady_state_time_df["%time"][0])
+    for i, d in enumerate(all_dfs):
+        all_dfs[i].drop(d[d["%time"] <= steady_state_time].index, inplace=True)
+    print(steady_state_time)
+
 
     # ============= convert time from nanoseconds to seconds ===============
 
@@ -231,25 +237,20 @@ def process_robsag(file):
                 if "stamp" in col or col == "%time":
                     d[col] = d[col] / 1_000_000_000
                     new_times = []
-                    start = d[col][0]
+                    start = d.iloc[0][col]
                     for time in d[col]:
                         new_times.append(time - start)
                     d[col] = new_times
     normalize_time(all_dfs)
     # ============= convert time from nanoseconds to seconds ===============
 
-    # # ========= STEADY STATE TIME CALCULATION, CUT ALL DATA BEFORE =========
-    # steady_state_time = (steady_state_time_df["%time"][0] / 1_000_000_000)
-    # for i, d in enumerate(all_dfs):
-    #     all_dfs[i].drop(d[d["%time"] <= steady_state_time].index, inplace=True)
-    # print(steady_state_time)
     
     df_names = ["model_states", "imu", "joint_states", "fl_torque", "fr_torque", "bl_torque", "br_torque"]
 
     avg_hz = []
     for d in all_dfs:
         points = []
-        first = d["%time"][0]
+        first = d.iloc[0]["%time"]
         prev = 0
         for i, time in enumerate(d["%time"]):
             time -= first
@@ -361,9 +362,10 @@ def process_robsag(file):
     sim_rot_y = downsample(rover_time_cut, state_df_time, state_df["pose.orientation.y"].to_numpy())
     sim_rot_z = downsample(rover_time_cut, state_df_time, state_df["pose.orientation.z"].to_numpy())
     sim_rot_w = downsample(rover_time_cut, state_df_time, state_df["pose.orientation.w"].to_numpy())
+    sim_original_rot = np.array(np.transpose([sim_rot_x, sim_rot_y, sim_rot_z, sim_rot_w]))
 
     # rotate 90 degrees to ADJUST from forward=-y to forward=+x, same coordinate space as cadre rover
-    test_rotation = quaternion_from_euler(0, 0, np.pi / 2)
+    test_rotation = quaternion_from_euler(0, 0, np.pi)
     sim_rot_vec4 = np.transpose(np.array([sim_rot_x, sim_rot_y, sim_rot_z, sim_rot_w]))
     sim_rot_vec4 = [quaternion_multiply(test_rotation, q) for q in sim_rot_vec4]
     sim_rot_x = [quat[0] for quat in sim_rot_vec4]
@@ -378,7 +380,7 @@ def process_robsag(file):
 
     # get rotation matrix to convert to local space
     sim_rotations = []
-    for quat in sim_rot_quaternions:
+    for quat in sim_original_rot:
         sim_rotations.append(quaternion_matrix(quat))
 
     # transform to local space for linear velocity 
@@ -444,10 +446,11 @@ def process_robsag(file):
     # CALCULATE SLIP RATIOS
     # ADJUSTMENT: negate velocity because urdf is messed up and need to flip the direction that the wheels spin
     joint_states_time = joint_states_df["%time"].to_numpy()
-    sim_front_left_vel = [1 * x for x in downsample(rover_time_cut, joint_states_time, joint_states_df["front_left_velocity"].to_numpy())]
+    sim_front_left_vel  = [1 * x for x in downsample(rover_time_cut, joint_states_time, joint_states_df["front_left_velocity"].to_numpy())]
     sim_front_right_vel = [1 * x for x in downsample(rover_time_cut, joint_states_time, joint_states_df["front_right_velocity"].to_numpy())]
-    sim_back_left_vel = [1 * x for x in downsample(rover_time_cut, joint_states_time, joint_states_df["back_left_velocity"].to_numpy())]
-    sim_back_right_vel = [1 * x for x in downsample(rover_time_cut, joint_states_time, joint_states_df["back_right_velocity"].to_numpy())]
+    sim_back_left_vel   = [1 * x for x in downsample(rover_time_cut, joint_states_time, joint_states_df["back_left_velocity"].to_numpy())]
+    sim_back_right_vel  = [1 * x for x in downsample(rover_time_cut, joint_states_time, joint_states_df["back_right_velocity"].to_numpy())]
+    print(np.array(sim_front_left_vel))
 
     epsilon = 0.01 # less than 0.005 m/s considered not moving, only at start is rover is sitting still
     sim_fl_slip = []
@@ -455,7 +458,7 @@ def process_robsag(file):
     sim_bl_slip = []
     sim_br_slip = []
     for i, lin_vel in enumerate(sim_lin_vel_local):
-        vel = lin_vel[0] if abs(lin_vel[0]) > epsilon else 0 # ADJUSTMENT: rotated so it matches cadre rover
+        vel = lin_vel[0] if abs(lin_vel[0]) > epsilon else lin_vel[0] / 1_000_000 # ADJUSTMENT: rotated so it matches cadre rover
         temp_fr_slip = 1-(vel/sim_front_left_vel[i])
         temp_fl_slip = 1-(vel/sim_front_right_vel[i])
         temp_bl_slip = 1-(vel/sim_back_left_vel[i])

@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ET # GO HOME
 import os
 import pickle
 import json
+import re
 from preprocess_trial_params import generate_trial_params_json, data # data class needed for pickle
 
 rospy.init_node("init_trial_node")
@@ -72,6 +73,14 @@ rospy.loginfo(f"Setting floor rotation to: {degrees} degrees")
 floor_link = f"./world/state/model[@name='Floor']/link[@name='link_0']/pose"
 xml_root.find(floor_link).text = f"-0.010923 0.300375 -0.916015 0 {-radians} 0"
 tree.write(world_file_path)
+
+# rotate the rover
+rover_launch_file = os.path.join(rospack.get_path('khm2_bringup'), 'launch/rover.launch')
+with open(rover_launch_file, 'r') as file:
+    rover_launch_file_text = file.read()
+    replacement = f'<arg name="rr" value="{radians}"/>'
+    pattern = re.compile(r'<arg name="rr" value=".*"/>')
+    rover_launch_file_text = re.sub(pattern, replacement, rover_launch_file_text)
 
 # =================================
 

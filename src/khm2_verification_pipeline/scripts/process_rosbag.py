@@ -310,11 +310,16 @@ def process_robsag(file):
     cadre_data, degrees_mapped_files = analysis.get_cadre_files()
     # get all data related to 0 degree inclination
 
-    with open(os.path.join(data_path_dir, file_name)) as file:
+    print(os.path.join(data_path_dir, file_name))
+    with open(os.path.join(data_path_dir, 'sim_trial_to_cadre_trial.json'), 'r') as file:
         sim_trial_to_cadre_trial = json.load(file)
+    if file_name not in sim_trial_to_cadre_trial.keys():
+        print(f"Error: {file_name} not in sim_trial_to_cadre_trial.json")
+        return
     cadre_file = sim_trial_to_cadre_trial[file_name]
     trial = cadre_data[cadre_file]
     rover_time_cut = trial.rover_time_cut
+    print(f"Comparing to cadre trial: {cadre_file}")
     
     # create figure for plots
     # fig = plt.figure(figsize=(20,10))
@@ -466,10 +471,10 @@ def process_robsag(file):
     cad_rot_quaternions = np.transpose(np.array([cad_rotation_x, cad_rotation_y, cad_rotation_z, cad_rotation_w]))
     
     # 850 = gear ratio, 60 min to sec, 2*pi*r = 2pi(0.075cm/s) = circumference. Get angular velocity in m/s
-    cad_front_left_vel  = [(rpm / 850 / 60) * 2 * math.pi * 0.075 for rpm in trial.motor_rpm_1_cut]
-    cad_front_right_vel = [(rpm / 850 / 60) * 2 * math.pi * 0.075 for rpm in trial.motor_rpm_2_cut]
-    cad_back_left_vel   = [(rpm / 850 / 60) * 2 * math.pi * 0.075 for rpm in trial.motor_rpm_3_cut]
-    cad_back_right_vel  = [(rpm / 850 / 60) * 2 * math.pi * 0.075 for rpm in trial.motor_rpm_4_cut]
+    cad_front_left_vel  = [(rpm / 1480 / 60) * 2 * math.pi * 0.075 for rpm in trial.motor_rpm_1_cut]
+    cad_front_right_vel = [(rpm / 1480 / 60) * 2 * math.pi * 0.075 for rpm in trial.motor_rpm_2_cut]
+    cad_back_left_vel   = [(rpm / 1480 / 60) * 2 * math.pi * 0.075 for rpm in trial.motor_rpm_3_cut]
+    cad_back_right_vel  = [(rpm / 1480 / 60) * 2 * math.pi * 0.075 for rpm in trial.motor_rpm_4_cut]
 
     # get rotation matrix to convert to local space
     cad_rotations = []
@@ -509,9 +514,9 @@ def process_robsag(file):
 
     # position
     ax2 = fig.add_subplot(4,4,1)
-    ax2.plot(rover_time_cut, cad_centered_pos_x, label='simulated_rover')
+    ax2.plot(rover_time_cut, sim_pos_final[0], label='simulated_rover')
     ax2 = fig.add_subplot(4,4,1)
-    ax2.plot(rover_time_cut, sim_pos_final[0], label='cadre_rover')
+    ax2.plot(rover_time_cut, cad_centered_pos_x, label='cadre_rover')
     plt.xlabel('time [sec]')
     plt.ylabel('x position [m]')
     plt.title('x position [m] over time [s]')

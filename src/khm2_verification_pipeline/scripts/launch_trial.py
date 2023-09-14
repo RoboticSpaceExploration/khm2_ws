@@ -12,6 +12,7 @@ import os
 rospack = rospkg.RosPack()
 # load trial params from json
 data_path = os.path.join(rospack.get_path('khm2_verification_pipeline'), 'data/trial_params.json')
+data_dir_path = os.path.join(rospack.get_path('khm2_verification_pipeline'), 'data')
 with open(data_path, 'r') as json_file:
     trial_params = json.load(json_file)
 # read trial parameters
@@ -24,6 +25,7 @@ angle = trial_params[cadre_file_name]["angle"] # degrees
 already_reached_steady_state = False
 steady_state_time = rospy.Publisher("/steady_state_time", Float32, queue_size=10, latch=True)
 joint_state_time = 0
+done_with_trial = False
 
 # =================== START ROSLAUNCH SETUP =================
 file_name = f"sim_{angle}DEG"
@@ -40,7 +42,8 @@ rospy.loginfo("started rosbag record node")
 # =================== END ROSLAUNCH SETUP ===============
 
 def shutdown_node(event):
-    rospy.signal_shutdown("Trial complete")
+    global done_with_trial
+    done_with_trial = True
 
 def steady_state_timer_callback(timerEvent):
     steady_state_time.publish(joint_state_time)
@@ -67,7 +70,7 @@ if __name__ == "__main__":
     rospy.loginfo(f"Angle: {angle} degrees")
 
     rate = rospy.Rate(1000)
-    while not rospy.is_shutdown():
+    while not done_with_trial:
         msg = Twist()
         msg.linear.x = speed # m/s
         cmd_vel_pub.publish(msg)
@@ -75,14 +78,16 @@ if __name__ == "__main__":
 
     # rosbag record automatically closes when script finishes executing
     # record rosbag file to cadre trial mapping
-    if not os.path.isfile(os.path.join(data_path, 'sim_trial_to_cadre_trial.json')):
+    sim_trial_to_cadre_trial = None
+    if not os.path.isfile(os.path.join(data_dir_path, 'sim_trial_to_cadre_trial.json')):
         sim_trial_to_cadre_trial = {}
     else:
-        sim_trial_to_cadre_trial = json.load(open(os.path.join(data_path, 'sim_trial_to_cadre_trial.json'), 'r'))
+        with open(os.path.join(data_dir_path, 'sim_trial_to_cadre_trial.json'), 'r') as json_file:
+            sim_trial_to_cadre_trial = json.load(json_file)
     # look for rosbag 
-    for file in os.listdir(data_path):
+    for file in os.listdir(data_dir_path):
         if file.endswith('.active'):
-            sim_trial_to_cadre_trial[file_name] = cadre_file_name
-            json.dump(sim_trial_to_cadre_trial, open(os.path.join(data_path, 'sim_trial_to_cadre_trial.json'), 'w'))
-            rospy.loginfo(f"Recorded sim trial {file_name} to cadre trial {cadre_file_name}")
+            sim_trial_to_cadre_trial[file[:-7]] = cadre_file_name
+            json.dump(sim_trial_to_cadre_trial, open(os.path.join(data_dir_path, 'sim_trial_to_cadre_trial.json'), 'w'), indent=4, ensure_ascii=True)
+            rospy.loginfo(f"Recorded sim trial {file[:-7]} to cadre trial {cadre_file_name}")
             break

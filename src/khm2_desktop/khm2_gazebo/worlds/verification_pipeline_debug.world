@@ -60,7 +60,7 @@
         <pose>0 0 -0.916015 0 -0.261799 0</pose>
         <scale>1 1 1</scale>
         <link name="link_0">
-          <pose>-0.010923 0.300375 -0.916015 0 -0.5235986666666667 0</pose>
+          <pose>-0.010923 0.300375 -0.916015 0 -0.0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>

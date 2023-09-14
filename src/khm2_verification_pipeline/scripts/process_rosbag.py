@@ -449,7 +449,7 @@ def process_robsag(file):
     sim_back_left_vel = [-1 * x for x in downsample(rover_time_cut, joint_states_time, joint_states_df["back_left_velocity"].to_numpy())]
     sim_back_right_vel = [-1 * x for x in downsample(rover_time_cut, joint_states_time, joint_states_df["back_right_velocity"].to_numpy())]
 
-    epsilon = 0.005 # less than 0.005 m/s considered not moving, only at start is rover is sitting still
+    epsilon = 0.01 # less than 0.005 m/s considered not moving, only at start is rover is sitting still
     sim_fl_slip = []
     sim_fr_slip = []
     sim_bl_slip = []

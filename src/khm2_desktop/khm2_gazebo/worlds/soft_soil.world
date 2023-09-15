@@ -6,8 +6,8 @@
       <sandbox>
         <width_x>1</width_x>
         <width_y>1</width_y>
-        <resolution>0.01</resolution>
-        <angle>0</angle>
+        <resolution>0.005</resolution>
+        <angle>0.1</angle>
       </sandbox>
       <links>
           <link>FR_wheel_link</link>  

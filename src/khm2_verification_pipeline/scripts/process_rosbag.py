@@ -5,18 +5,6 @@ import sys
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-<<<<<<< HEAD
-from tf.transformations import quaternion_matrix
-from scipy.spatial.transform import Rotation
-import analysis
-from analysis import data
-
-path = None
-if (len(sys.argv) != 2):
-    print("Default output directory: khm2_ws/src/khm2_verification_pipeline/data")
-    path = os.path.join(os.path.dirname(__file__),"../data")
-    print(path)
-=======
 from tf.transformations import quaternion_matrix, quaternion_multiply, quaternion_from_euler
 import analysis
 import math
@@ -34,20 +22,14 @@ if (len(sys.argv) != 2):
     print("Default output directory: khm2_ws/src/khm2_verification_pipeline/data")
     data_path_dir = os.path.join(rospack.get_path('khm2_verification_pipeline'), 'data')
     print(data_path_dir)
->>>>>>> d6e6974418bc85c990dd74811f846e600c1a50ca
     # sys.exit(1)
 elif not os.path.isdir(sys.argv[1]):
     print("Error: <folder_with_bag_files> must be a folder")
     sys.exit(1)
 else:
-<<<<<<< HEAD
-    path = os.path.abspath(sys.argv[1])
-
-=======
     data_path_dir = os.path.abspath(sys.argv[1])
 
 # need this class for pickle, why so big
->>>>>>> d6e6974418bc85c990dd74811f846e600c1a50ca
 class data:
     def __init__(self, vicon_time_cut, position_x_cut, position_y_cut, position_z_cut,
                 rotation_x_cut, rotation_y_cut, rotation_z_cut, rotation_w_cut, 
@@ -101,10 +83,7 @@ def process_robsag(file):
     cmd5 = f"rostopic echo -b {file_path} -p /front_right_torque > {output_dir_path}/{file_name_no_ext}_front_right_torque.csv"
     cmd6 = f"rostopic echo -b {file_path} -p /back_left_torque > {output_dir_path}/{file_name_no_ext}_back_left_torque.csv"
     cmd7 = f"rostopic echo -b {file_path} -p /back_right_torque > {output_dir_path}/{file_name_no_ext}_back_right_torque.csv"
-<<<<<<< HEAD
-=======
     cmd8 = f"rostopic echo -b {file_path} -p /steady_state_time > {output_dir_path}/{file_name_no_ext}_steady_state_time.csv"
->>>>>>> d6e6974418bc85c990dd74811f846e600c1a50ca
     print(f"processing and outputting to csv for {file_name_no_ext}.bag")
     if not os.path.exists(f"{output_dir_path}/{file_name_no_ext}_model_states.csv"):
         os.system(cmd1)
@@ -120,11 +99,8 @@ def process_robsag(file):
         os.system(cmd6)
     if not os.path.exists(f"{output_dir_path}/{file_name_no_ext}_back_right_torque.csv"):
         os.system(cmd7)
-<<<<<<< HEAD
-=======
     if not os.path.exists(f"{output_dir_path}/{file_name_no_ext}_steady_state_time.csv"):
         os.system(cmd8)
->>>>>>> d6e6974418bc85c990dd74811f846e600c1a50ca
     print(f"done outputting csv")
     print(f"compiling csv data")
     csv_path_partial = os.path.join(output_dir_path, file_name_no_ext)
@@ -145,14 +121,10 @@ def process_robsag(file):
     fr_torque_df = pd.read_csv(csv_path_partial + "_front_right_torque.csv")
     bl_torque_df = pd.read_csv(csv_path_partial + "_back_left_torque.csv")
     br_torque_df = pd.read_csv(csv_path_partial + "_back_right_torque.csv")
-<<<<<<< HEAD
-
-=======
     try:
         steady_state_time_df = pd.read_csv(csv_path_partial + "_steady_state_time.csv")
     except:
         steady_state_time_df = pd.DataFrame({"%time": [0.4]}, index=[0])
->>>>>>> d6e6974418bc85c990dd74811f846e600c1a50ca
 
     # ============= model_states csv needs special processing ===============
     # find the index of the rover
@@ -186,14 +158,11 @@ def process_robsag(file):
     for col in joint_states_df.columns:
         if "effort" in col:
             del joint_states_df[col]
-<<<<<<< HEAD
-=======
     def divide_ten(x):
         return x / 10
     for col in joint_states_df.columns:
         if "velocity" in col:
             joint_states_df[col] = joint_states_df[col] / 10
->>>>>>> d6e6974418bc85c990dd74811f846e600c1a50ca
     # ============== clean joint_states csv ==============
 
     def delete_field_from_col(df: pd.DataFrame):
@@ -211,11 +180,8 @@ def process_robsag(file):
     delete_field_from_col(bl_torque_df)
     delete_field_from_col(br_torque_df)
 
-<<<<<<< HEAD
-=======
 
 
->>>>>>> d6e6974418bc85c990dd74811f846e600c1a50ca
     # ============== clean wheel torque dataframes ==============
     def clean_torque_dataframes(d: pd.DataFrame, prepend_val):
         renamed_cols = []
@@ -256,23 +222,6 @@ def process_robsag(file):
 
     all_dfs = [state_df, imu_df, joint_states_df, fl_torque_df, fr_torque_df, bl_torque_df, br_torque_df]
 
-<<<<<<< HEAD
-    # ============= convert time from nanoseconds to seconds ===============
-    for d in all_dfs:
-        for col in d.columns:
-            if "stamp" in col or col == "%time":
-                d[col] = d[col].map(lambda x: x / 1_000_000_000)
-                new_times = []
-                start = d[col][0]
-                for time in d[col]:
-                    new_times.append(time - start)
-                d[col] = new_times
-
-
-    # ============= convert time from nanoseconds to seconds ===============
-
-    df = pd.concat([state_df, imu_df, joint_states_df, fl_torque_df, fr_torque_df, bl_torque_df, br_torque_df], axis=1, join='inner')
-=======
     # ========= STEADY STATE TIME CALCULATION, CUT ALL DATA BEFORE =========
     steady_state_time = (steady_state_time_df["%time"][0])
     for i, d in enumerate(all_dfs):
@@ -296,17 +245,12 @@ def process_robsag(file):
     # ============= convert time from nanoseconds to seconds ===============
 
     
->>>>>>> d6e6974418bc85c990dd74811f846e600c1a50ca
     df_names = ["model_states", "imu", "joint_states", "fl_torque", "fr_torque", "bl_torque", "br_torque"]
 
     avg_hz = []
     for d in all_dfs:
         points = []
-<<<<<<< HEAD
-        first = d["%time"][0]
-=======
         first = d.iloc[0]["%time"]
->>>>>>> d6e6974418bc85c990dd74811f846e600c1a50ca
         prev = 0
         for i, time in enumerate(d["%time"]):
             time -= first
@@ -350,37 +294,6 @@ def process_robsag(file):
     print_df_keys(bl_torque_df)
     print_df_keys(br_torque_df)
 
-<<<<<<< HEAD
-    # import cadre data with 0 degrees
-
-    # Slip vs sinkage 
-    # slip vs angle
-
-    # necessary
-    # RMS error xyz across time
-        # between samples
-        # Useful for? 
-            # represent steady state vs initial condition
-    
-    # nice to have
-    # compare to ishigami's theory
-        # drawbar pull
-    # virtual bevameter?
-        # sinkage pressure curve
-
-    # tonight, traction equations
-    # grouser modeling
-
-    # mock results
-    # 1. cadre initial conditions into sim
-    # 2. sampling rate, run couple tests on titan
-    # 3. analysis: RMS error, angular velocity, position, linear velocity, etc
-
-    # RMS error will give idea
-    # 
-
-    # time_arr1 and val_arr1 assumed to have same length
-=======
 
     # RMSE will give idea
     def rmse_position(predictions, targets):
@@ -388,7 +301,6 @@ def process_robsag(file):
 
     # time_arr1 and val_arr1 assumed to have same length
     # return the array of values with the closest time stamp
->>>>>>> d6e6974418bc85c990dd74811f846e600c1a50ca
     def downsample(time_arr1, time_arr2, val_arr2):
         result = []
         for t in time_arr1:
@@ -396,151 +308,6 @@ def process_robsag(file):
             result.append(val_arr2[i])
         return result
 
-<<<<<<< HEAD
-    fr_vel = joint_states_df["front_right_velocity"].to_numpy()
-    joint_states_time = joint_states_df["%time"].to_numpy()
-    fig = plt.figure(figsize=(20,10))
-    ax1 = fig.add_subplot(4,4,1)
-    ax1.plot(joint_states_time, fr_vel)
-    plt.xlabel('time [sec]')
-    plt.ylabel('front right wheel velocity [m/s]')
-
-    state_df_time = state_df["%time"].to_numpy()
-    posx_downsampled = downsample(joint_states_time, state_df_time, state_df["pose.position.x"].to_numpy())
-    posy_downsampled = downsample(joint_states_time, state_df_time, state_df["pose.position.y"].to_numpy())
-    posz_downsampled = downsample(joint_states_time, state_df_time, state_df["pose.position.z"].to_numpy())
-    posx_downsampled = [-1 * x for x in posx_downsampled]
-    posy_downsampled = [-1 * x for x in posy_downsampled]
-    posz_downsampled = [-1 * x for x in posz_downsampled]
-
-    ax2 = fig.add_subplot(4,4,2)
-    ax2.plot(joint_states_time, posx_downsampled, label= 'x')
-    plt.xlabel('time [sec]')
-    plt.ylabel('x position [m]')
-    plt.ylim(-1, 1)
-
-    ax2 = fig.add_subplot(4,4,3)
-    ax2.plot(joint_states_time, posy_downsampled, label= 'y')
-    plt.xlabel('time [sec]')
-    plt.ylabel('y position [m]')
-
-    ax2 = fig.add_subplot(4,4,4)
-    ax2.plot(joint_states_time, posz_downsampled, label= 'z')
-    plt.xlabel('time [sec]')
-    plt.ylabel('z position [m]')
-    plt.ylim(-1, 1)
-
-    # need linear velocity xyz and angular velocity xyz of rover
-    sim_lin_x = downsample(joint_states_time, state_df_time, state_df["twist.linear.x"].to_numpy())
-    sim_lin_y = downsample(joint_states_time, state_df_time, state_df["twist.linear.y"].to_numpy())
-    sim_lin_z = downsample(joint_states_time, state_df_time, state_df["twist.linear.z"].to_numpy())
-    sim_ang_x = downsample(joint_states_time, state_df_time, state_df["twist.angular.x"].to_numpy())
-    sim_ang_y = downsample(joint_states_time, state_df_time, state_df["twist.angular.y"].to_numpy())
-    sim_ang_z = downsample(joint_states_time, state_df_time, state_df["twist.angular.z"].to_numpy())
-
-
-    quat_x = downsample(joint_states_time, state_df_time, state_df["pose.orientation.x"].to_numpy())
-    quat_y = downsample(joint_states_time, state_df_time, state_df["pose.orientation.x"].to_numpy())
-    quat_z = downsample(joint_states_time, state_df_time, state_df["pose.orientation.x"].to_numpy())
-    quat_w = downsample(joint_states_time, state_df_time, state_df["pose.orientation.x"].to_numpy())
-    quat_df = np.transpose(np.array([quat_x, quat_y, quat_z, quat_w]))
-
-    # World space linear velocity of rover
-    lin_vel_world = np.array(np.transpose([sim_lin_x, sim_lin_y, sim_lin_z]))
-    ang_vel_world = np.array(np.transpose([sim_ang_x, sim_ang_y, sim_ang_z]))
-
-    # get rotation matrix to convert to local space
-    rotations = []
-    for quat in quat_df:
-        rotations.append(quaternion_matrix(quat)[:3,:3])
-    
-    # transform to local space for linear velocity 
-    lin_vel_local = []
-    ang_vel_local = []
-    for i, rot in enumerate(rotations):
-        lin_vel_local.append(np.matmul(np.linalg.inv(rot), lin_vel_world[i]))
-        ang_vel_local.append(np.matmul(np.linalg.inv(rot), ang_vel_world[i]))
-
-    lin_vel_local = np.transpose(lin_vel_local)
-    lin_vel_x_local = lin_vel_local[0]
-    lin_vel_y_local = lin_vel_local[1]
-    lin_vel_z_local = lin_vel_local[2]
-
-    ang_vel_local = np.transpose(ang_vel_local)
-    ang_vel_x_local = ang_vel_local[0]
-    ang_vel_y_local = ang_vel_local[1]
-    ang_vel_z_local = ang_vel_local[2]
-    
-    def get_wheel_lin_vel(body_lin_vel, body_ang_vel, radius):
-        result = []
-        # index 0 = x, index 1 = y, index 2 = z
-        for i, lin_vel in enumerate(body_lin_vel):
-            result.append(np.cross(body_ang_vel[i], radius) + lin_vel)
-        return result
-
-    print("calculating slip ratios")
-    fl_wheel_lin_vel = get_wheel_lin_vel(list(zip(lin_vel_x_local, lin_vel_y_local, lin_vel_z_local)), 
-                                         list(zip(ang_vel_x_local, ang_vel_y_local, ang_vel_z_local)), 
-                                         [-0.145, 0.145225, -0.1])
-    fr_wheel_lin_vel = get_wheel_lin_vel(list(zip(lin_vel_x_local, lin_vel_y_local, lin_vel_z_local)), 
-                                         list(zip(ang_vel_x_local, ang_vel_y_local, ang_vel_z_local)), 
-                                         [0.145, 0.145225, -0.1])
-    bl_wheel_lin_vel = get_wheel_lin_vel(list(zip(lin_vel_x_local, lin_vel_y_local, lin_vel_z_local)), 
-                                         list(zip(ang_vel_x_local, ang_vel_y_local, ang_vel_z_local)), 
-                                         [-0.145, -0.145225, -0.1])
-    br_wheel_lin_vel = get_wheel_lin_vel(list(zip(lin_vel_x_local, lin_vel_y_local, lin_vel_z_local)), 
-                                         list(zip(ang_vel_x_local, ang_vel_y_local, ang_vel_z_local)), 
-                                         [0.145, -0.145225, -0.1])
-
-    fl_slip = [1 - (lin_vel / joint_states_df["front_left_velocity"][i]) for i, lin_vel in enumerate(fl_wheel_lin_vel)]
-
-    # print(fl_slip)
-
-
-    ax2 = fig.add_subplot(4,4,6)
-    ax2.plot(joint_states_time, posy_downsampled, label='y')
-    plt.xlabel('time [sec]')
-    plt.ylabel('linear velocity x [m/s]')
-    # plt.ylim(-1, 1)
-    lin_vel_y_range = abs(plt.ylim()[0] - plt.ylim()[1])
-
-    ax2 = fig.add_subplot(4,4,5)
-    ax2.plot(joint_states_time, posx_downsampled, label='x')
-    plt.xlabel('time [sec]')
-    plt.ylabel('linear velocity x [m/s]')
-    center = (plt.ylim()[0] + plt.ylim()[1]) / 2
-    plt.ylim(center - lin_vel_y_range, center + lin_vel_y_range)
-
-    ax2 = fig.add_subplot(4,4,7)
-    ax2.plot(joint_states_time, posz_downsampled, label='z')
-    plt.xlabel('time [sec]')
-    plt.ylabel('linear velocity x [m/s]')
-    center = (plt.ylim()[0] + plt.ylim()[1]) / 2
-    plt.ylim(center - lin_vel_y_range, center + lin_vel_y_range)
-    # plt.ylim(-1, 1)
-
-    # ax2 = fig.add_subplot(3,1,2)
-    # ax2.plot(rover_time_cut, position_y_cut, label= 'y')
-    # plt.xlabel('time [sec]')
-    # plt.ylabel('y position [m]')
-
-    # for type hinting
-    def get_type_hinting(cadre_data) -> data:
-        return cadre_data
-
-    cadre_data, degrees_mapped_files = analysis.get_cadre_files()
-    # get all data related to 0 degree inclination
-    deg0_files = [file for file in cadre_data.keys() if degrees_mapped_files[file] == 0]
-    print(deg0_files)
-
-    deg0_file_test = cadre_data[deg0_files[0]]
-    rover_time_cut = deg0_file_test.rover_time_cut
-
-    # downsample rover data to nearest cadre time stamp
-    
-    # plt.show()
-
-=======
     cadre_data, degrees_mapped_files = analysis.get_cadre_files()
     # get all data related to 0 degree inclination
 
@@ -1039,4 +806,3 @@ for file in os.listdir(data_path_dir):
 # 1. cadre initial conditions into sim
 # 2. sampling rate, run couple tests on titan
 # 3. analysis: RMS error, angular velocity, position, linear velocity, etc
->>>>>>> d6e6974418bc85c990dd74811f846e600c1a50ca

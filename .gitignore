@@ -1,8 +1,6 @@
 build
 devel
-<<<<<<< HEAD
-=======
 src/khm2_verification_pipeline/data/cut_data
->>>>>>> d6e6974418bc85c990dd74811f846e600c1a50ca
 src/khm2_verification_pipeline/*.bag
+src/khm2_verification_pipeline/*.active
 src/khm2_verification_pipeline/scripts/__pycache__/

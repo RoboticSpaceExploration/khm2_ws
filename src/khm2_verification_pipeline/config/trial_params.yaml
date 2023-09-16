@@ -1,5 +1,0 @@
-trial_params:
-  time: 10 # in seconds
-  speed: 6 # in cm/s
-  angle: 0 # in degrees
-  turning: False

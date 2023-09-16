@@ -7,7 +7,11 @@ robot1_velocity_controller:
   type: "diff_drive_controller/DiffDriveController"
   left_wheel: ['FL_TO_BASELINK', 'BL_TO_BASELINK']
   right_wheel: ['FR_TO_BASELINK', 'BR_TO_BASELINK']
+<<<<<<< HEAD
   publish_rate: 100.0
+=======
+  publish_rate: 1000.0
+>>>>>>> d6e6974418bc85c990dd74811f846e600c1a50ca
   pose_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.03]
   twist_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.03]
   cmd_vel_timeout: 0.50

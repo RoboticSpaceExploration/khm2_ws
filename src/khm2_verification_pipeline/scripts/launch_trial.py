@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 import rospy
-<<<<<<< HEAD
-from geometry_msgs.msg import Twist
-=======
 import rospkg
->>>>>>> d6e6974418bc85c990dd74811f846e600c1a50ca
 import roslaunch
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float32
@@ -31,33 +27,12 @@ steady_state_time = rospy.Publisher("/steady_state_time", Float32, queue_size=10
 joint_state_time = 0
 done_running_trial = False
 
-<<<<<<< HEAD
-# read trial parameters
-time = rospy.get_param('/trial_params/time', None) # s
-speed = rospy.get_param('/trial_params/speed', None) # cm/s
-angle = rospy.get_param('/trial_params/angle', None) # degrees
-if time == None:
-    rospy.set_param('/trial_params/time', 15)
-    time = 15
-if speed == None:
-    rospy.set_param('/trial_params/speed', 4)
-    speed = 6
-if angle == None:
-    rospy.set_param('/trial_params/angle', 0)
-    angle = 0
-
-=======
 # =================== START ROSLAUNCH SETUP =================
->>>>>>> d6e6974418bc85c990dd74811f846e600c1a50ca
 file_name = f"sim_{angle}DEG"
 # launch rosbag record and close when node is done with trial
 rosbag_pkg = 'rosbag'
 rosbag_exe = 'record'
-<<<<<<< HEAD
-rosbag_node = roslaunch.core.Node(rosbag_pkg, rosbag_exe, args=f"-o $(find khm2_verification_pipeline)/data/{file_name} /joint_states /front_left_torque /front_right_torque /back_left_torque /back_right_torque /imu /gazebo/model_states", output="screen")
-=======
 rosbag_node = roslaunch.core.Node(rosbag_pkg, rosbag_exe, args=f"-o $(find khm2_verification_pipeline)/data/{file_name} /joint_states /front_left_torque /front_right_torque /back_left_torque /back_right_torque /imu /gazebo/model_states /steady_state_time", output="screen")
->>>>>>> d6e6974418bc85c990dd74811f846e600c1a50ca
 
 launch = roslaunch.scriptapi.ROSLaunch()
 launch.start()
@@ -83,32 +58,6 @@ def joint_states_callback(msg):
             already_reached_steady_state = True
             rospy.Timer(rospy.Duration(secs=0.3), steady_state_timer_callback, oneshot=True)
 
-<<<<<<< HEAD
-def shutdown_node(event):
-    rospy.signal_shutdown("Trial complete")
-
-def main():
-    rospy.init_node('run_trial_node')
-
-    cmd_vel_pub = rospy.Publisher("/robot1_velocity_controller/cmd_vel", Twist, queue_size=10)
-
-    timer = rospy.Timer(rospy.Duration(secs=time), shutdown_node)
-    rospy.loginfo("Starting trial...")
-    rospy.loginfo(f"Trial duration: {time} seconds")
-    rospy.loginfo(f"Rover speed: {speed} cm/s")
-    rospy.loginfo(f"Angle: {angle} degrees")
-
-    while not rospy.is_shutdown():
-        msg = Twist()
-        msg.linear.x = speed / 100 # convert cm/s to m/s
-        cmd_vel_pub.publish(msg)
-
-    # rosbag record automatically closes when script finishes executing
-    
-
-if __name__ == '__main__':
-    main()
-=======
 if __name__ == "__main__":
     rospy.init_node('run_trial_node')
 
@@ -142,4 +91,3 @@ if __name__ == "__main__":
             json.dump(sim_trial_to_cadre_trial, open(os.path.join(data_dir_path, 'sim_trial_to_cadre_trial.json'), 'w'), indent=4)
             rospy.loginfo(f"Recorded sim trial {file[:-7]} to cadre trial {cadre_file_name}")
             break
->>>>>>> d6e6974418bc85c990dd74811f846e600c1a50ca

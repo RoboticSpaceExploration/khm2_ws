@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+
+    <node name="rosbag_record_trial_node" pkg="rosbag" type="record" 
+    args="-o $(find khm2_verification_pipeline)/bags/sim /joint_states /front_left_torque /front_right_torque /back_left_torque /back_right_torque /imu /gazebo/model_states"
+    output="screen"/>
+    <!-- trial runner node -->
+    <node name="run_trial_node" pkg="khm2_verification_pipeline" type="run_trial.py" output="screen"/>
+    
+    
+</launch>

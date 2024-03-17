@@ -1,0 +1,18 @@
+<launch>
+
+
+	<arg name="x" value="0"/>
+	<arg name="y" value="0"/>
+	<arg name="z" value="0.2"/>
+	<arg name="rr" value="0"/>
+	<arg name="rp" value="0"/>
+	<arg name="ry" value="-1.5707"/>
+
+	<include file="$(find khm2_description)/launch/single_wheel.launch"/>
+
+
+    <!-- Spawn the single wheel model -->
+    <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" output="screen"
+          args="-urdf -model single_wheel_robot -param robot_description -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg rr) -P $(arg rp) -Y $(arg ry)"/>
+        
+</launch>

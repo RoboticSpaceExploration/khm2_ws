@@ -98,18 +98,14 @@
     </geometry>
   </collision>
   <inertial>
-      <mass value="2.0"/>
+      <mass value="2.3"/>
       <xacro:box_inertia m="2.0" x="0.333" y="0.16125" z="0.15428"/>        
   </inertial>
 </link>
 
 <joint name="FL_TO_BASELINK" type="continuous">
 	<hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-<<<<<<< HEAD
-	<origin xyz="-0.145 0.145225 -0.1" rpy="0 0 0"/>
-=======
 	<origin xyz="0.145225 0.145 -0.1" rpy="0 0 1.5707"/>
->>>>>>> d6e6974418bc85c990dd74811f846e600c1a50ca
 	<child link="FL_wheel_link"/>
 	<parent link="base_link"/>
 </joint>
@@ -117,11 +113,7 @@
 
 <joint name="FR_TO_BASELINK" type="continuous">
 	<hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-<<<<<<< HEAD
-	<origin xyz="0.145 0.145225 -0.1" rpy="0 0 0"/>
-=======
 	<origin xyz="0.145225 -0.145 -0.1" rpy="0 0 1.5707"/>
->>>>>>> d6e6974418bc85c990dd74811f846e600c1a50ca
 	<child link="FR_wheel_link"/>
 	<parent link="base_link"/>
 </joint>
@@ -129,11 +121,7 @@
 
 <joint name="BL_TO_BASELINK" type="continuous">
 	<hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-<<<<<<< HEAD
-	<origin xyz="-0.145 -0.145225 -0.1" rpy="0 0 0"/>
-=======
 	<origin xyz="-0.14225 0.145 -0.1" rpy="0 0 1.5707"/>
->>>>>>> d6e6974418bc85c990dd74811f846e600c1a50ca
 	<child link="BL_wheel_link"/>
 	<parent link="base_link"/>
 </joint>
@@ -141,8 +129,7 @@
 
 <joint name="BR_TO_BASELINK" type="continuous">
 	<hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-<<<<<<< HEAD
-	<origin xyz="0.145 -0.145225 -0.1" rpy="0 0 0"/>
+	<origin xyz="-0.145 -0.145225 -0.1" rpy="0 0 1.5707"/>
 	<child link="BR_wheel_link"/>
 	<parent link="base_link"/>
 </joint>

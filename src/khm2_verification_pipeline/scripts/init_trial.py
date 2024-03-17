@@ -64,14 +64,16 @@ rospy.set_param("/current_trial_file_name", cadre_file_name)
 
 # set up the world launch file's rotation
 world_file_path = os.path.join(rospack.get_path('khm2_gazebo'), 'worlds/verification_pipeline_debug.world')
+world_file_path = os.path.join(rospack.get_path('khm2_gazebo'), 'worlds/soft_soil.world')
 tree = ET.parse(world_file_path)
 xml_root = tree.getroot()
 
 degrees = trial_params[cadre_file_name]['angle']
 radians = degrees * 3.141592 / 180
 rospy.loginfo(f"Setting floor rotation to: {degrees} degrees")
-floor_link = f"./world/state/model[@name='Floor']/link[@name='link_0']/pose"
-xml_root.find(floor_link).text = f"-0.010923 0.300375 -0.916015 0 {-radians} 0"
+floor_angle_tag = f"./world/state/model[@name='Floor']/link[@name='link_0']/pose"
+floor_angle_tag = f"./world/plugin[@name='hina_ssi_physics']/sandbox/angle"
+xml_root.find(floor_angle_tag).text = f"{-radians} 0 0"
 tree.write(world_file_path)
 
 # rotate the rover

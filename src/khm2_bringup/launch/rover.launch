@@ -2,11 +2,11 @@
 
 
 <arg name="x" value="0"/>
-<arg name="y" value="-1.5"/>
-<arg name="z" value="0.23"/>
+<arg name="y" value="0"/>
+<arg name="z" value="0.2"/>
 <arg name="rr" value="0"/>
 <arg name="rp" value="0"/>
-<arg name="ry" value="0"/>
+<arg name="ry" value="-1.5707"/>
 
 <include file="$(find khm2_bringup)/launch/common.launch"/>
 

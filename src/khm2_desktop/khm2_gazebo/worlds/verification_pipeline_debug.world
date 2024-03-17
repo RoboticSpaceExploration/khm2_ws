@@ -59,22 +59,8 @@
       <model name="Floor">
         <pose>0 0 -0.916015 0 -0.261799 0</pose>
         <scale>1 1 1</scale>
-<<<<<<< HEAD
-        <!-- Define a material with friction properties -->
-  <surface>
-    <friction>
-      <ode>
-        <mu>0.2</mu> <!-- Set the desired friction coefficient (adjust as needed) -->
-        <mu2>0.2</mu2>
-      </ode>
-    </friction>
-  </surface>
-        <link name='link_0'>
-          <pose>-0.010923 0.300375 -0.916015 0 -0 0</pose>
-=======
         <link name="link_0">
-          <pose>-0.010923 0.300375 -0.916015 0 -0.5235986666666667 0</pose>
->>>>>>> d6e6974418bc85c990dd74811f846e600c1a50ca
+          <pose>-0.010923 0.300375 -0.916015 0 -0.0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>

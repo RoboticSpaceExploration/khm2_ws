@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+
+
+<robot name="single_wheel_robot"  xmlns:xacro="http://www.ros.org/wiki/xacro">
+    
+    <xacro:include filename="$(find khm2_description)/urdf/macro.xacro"/>
+     <!-- Define materials for the wheel -->
+    <material name="black">
+        <color rgba="0.0 0.0 0.0 1.0"/>
+    </material>
+    <link name="base_link"/>
+
+    <!-- Link for the wheel -->
+    <link name="wheel_link">
+     <visual>
+ 	   <origin rpy="0 0 0" xyz="0 0 0"/>
+ 	   <geometry>
+ 	     <mesh filename="package://khm2_description/models/smooth.stl"/>
+ 	   </geometry>
+     </visual>
+     <collision>
+ 	   <geometry>
+ 	     <mesh filename="package://khm2_description/models/smooth_col.dae"/>
+ 	   </geometry>
+      </collision>
+      <inertial>
+ 	   <mass value="0.06925"/>
+ 	   <origin xyz="0 0 0"/>
+ 	   <xacro:cylinder_inertia m="0.06925" r="0.112" h="0.127"/>
+      </inertial>
+    </link>
+
+    <!-- Fixed joint to lock the roll axis -->
+    <!-- Adjust "parent" and "child" if integrating into a larger robot structure -->
+    <joint name="fixed_joint" type="fixed">
+        <parent link="base_link"/> <!-- Assume a base_link for reference; adjust as needed -->
+        <child link="wheel_link"/>
+        <origin xyz="0 0 0.3" rpy="0 0 0"/> <!-- Adjust position as needed -->
+    </joint>
+</robot>
+

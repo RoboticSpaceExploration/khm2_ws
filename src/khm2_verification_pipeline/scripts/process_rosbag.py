@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from tf.transformations import quaternion_matrix, quaternion_multiply, quaternion_from_euler
 import analysis
 import math
+import statistics
 import warnings
 import json
 
@@ -61,7 +62,11 @@ class data:
         self.motor_current_3_cut = motor_current_3_cut
         self.motor_current_4_cut = motor_current_4_cut
 
-def process_robsag(file):
+# for comparing slip vs angle
+sim_slip_vs_angle = []
+cad_slip_vs_angle = []
+
+def process_rosbag(file):
     if not file.endswith(".bag"):
         print(f'File: {file} | is not a bag file')
         return
@@ -311,16 +316,18 @@ def process_robsag(file):
     cadre_data, degrees_mapped_files = analysis.get_cadre_files()
     # get all data related to 0 degree inclination
 
+    with open(os.path.join(data_path_dir, 'trial_params.json')) as file:
+        trial_params = json.load(file)
     print(os.path.join(data_path_dir, file_name))
     with open(os.path.join(data_path_dir, 'sim_trial_to_cadre_trial.json'), 'r') as file:
         sim_trial_to_cadre_trial = json.load(file)
     if file_name not in sim_trial_to_cadre_trial.keys():
         print(f"Error: {file_name} not in sim_trial_to_cadre_trial.json")
         return
-    cadre_file = sim_trial_to_cadre_trial[file_name]
-    trial = cadre_data[cadre_file]
+    cadre_file_name = sim_trial_to_cadre_trial[file_name]
+    trial = cadre_data[cadre_file_name]
     rover_time_cut = trial.rover_time_cut
-    print(f"Comparing to cadre trial: {cadre_file}")
+    print(f"Comparing to cadre trial: {cadre_file_name}")
     
     # create figure for plots
     # fig = plt.figure(figsize=(20,10))
@@ -467,6 +474,11 @@ def process_robsag(file):
         sim_fr_slip.append(temp_fr_slip)
         sim_bl_slip.append(temp_bl_slip)
         sim_br_slip.append(temp_br_slip)
+    sim_fl_slip = np.clip(sim_fl_slip, -1, 1)
+    sim_fr_slip = np.clip(sim_fr_slip, -1, 1)
+    sim_bl_slip = np.clip(sim_bl_slip, -1, 1)
+    sim_br_slip = np.clip(sim_br_slip, -1, 1)
+    
 
     # CALCULATE CADRE SLIP RATIO, 
     # Need local velocity of rover, and angular velocity and radius of wheels 
@@ -510,10 +522,18 @@ def process_robsag(file):
         cad_fr_slip.append(temp_fr_slip)
         cad_bl_slip.append(temp_bl_slip)
         cad_br_slip.append(temp_br_slip)
+    cad_fl_slip = np.clip(cad_fl_slip, -1, 1)
+    cad_fr_slip = np.clip(cad_fr_slip, -1, 1)
+    cad_bl_slip = np.clip(cad_bl_slip, -1, 1)
+    cad_br_slip = np.clip(cad_br_slip, -1, 1)
+
+    sim_vel_vec = np.transpose(np.array([sim_vel_x, sim_vel_y, sim_vel_z]))
+    sim_vel_mag = [np.sqrt(vel[0]**2 + vel[1]**2 + vel[2]**2) for vel in sim_vel_vec]
+    cad_vel_mag = [np.sqrt(vel[0]**2 + vel[1]**2 + vel[2]**2) for vel in cad_vel_vec]
 
     # COMPARISON PLOTS
     fig = plt.figure(figsize=(25,15))
-    plt.suptitle(f"Data plots using {cadre_file}")
+    plt.suptitle(f"Data plots using {cadre_file_name}")
 
     # position
     ax2 = fig.add_subplot(4,4,1)
@@ -622,6 +642,17 @@ def process_robsag(file):
     plt.legend()
     plt.autoscale()
 
+    # velocity magnitude
+    ax2 = fig.add_subplot(4,4,12)
+    ax2.plot(rover_time_cut, sim_vel_mag, label='simulated_rover')
+    ax2 = fig.add_subplot(4,4,12)
+    ax2.plot(rover_time_cut, cad_vel_mag, label='cadre_rover')
+    plt.xlabel('time [sec]')
+    plt.ylabel('speed [m/s]')
+    plt.title('speed [m/s] over time [s]')
+    plt.legend()
+    plt.autoscale()
+
     # slip ratio
     ax3 = fig.add_subplot(4,4,13)
     ax3.plot(rover_time_cut, sim_fl_slip, label='simulation front left wheel slip ratio')
@@ -664,11 +695,49 @@ def process_robsag(file):
     plt.legend()
 
     plt.tight_layout()
+
+
+    # calculate average slip ratio trial
+    
+    # average of 4 wheels
+    angle = trial_params[cadre_file_name]["angle"]
+
+    sim_avg_slips = [(sim_fl_slip[i] + sim_fr_slip[i] + sim_bl_slip[i] + sim_br_slip[i]) / 4 for i in range(len(rover_time_cut))]
+    sim_mean = sum(sim_avg_slips) / len(rover_time_cut)
+    sim_std_dev = statistics.stdev(sim_avg_slips)
+    sim_slip_vs_angle.append({"angle": angle, "mean": sim_mean, "std_dev": sim_std_dev})
+
+    cad_avg_slips = [(cad_fl_slip[i] + cad_fr_slip[i] + cad_bl_slip[i] + cad_br_slip[i]) / 4 for i in range(len(rover_time_cut))]
+    cad_mean = sum(cad_avg_slips) / len(rover_time_cut)
+    cad_std_dev = statistics.stdev(cad_avg_slips)
+    cad_slip_vs_angle.append({"angle": angle, "mean": cad_mean, "std_dev": cad_std_dev})
+
     plt.show()
+
+
 
 for file in os.listdir(data_path_dir):
     if file.endswith('.bag'):
-        process_robsag(file)
+        process_rosbag(file)
+
+fig = plt.figure(figsize=(25,15))
+plt.suptitle("slip vs angle")
+
+# {angle: {mean: x, std_dev:y }}
+sim_slips = [[slip["angle"], slip["mean"]] for slip in sim_slip_vs_angle]
+sim_slips = np.transpose(sim_slips)
+
+# plot every cadre trial slip vs angle
+# cadre_data_dir_path = os.path.join(rospack.get_path('khm2_verification_pipeline'), 'cut_data')
+cad_slips = [[slip["angle"], slip["mean"]] for slip in cad_slip_vs_angle]
+cad_slips = np.transpose(cad_slips)
+
+ax1 = fig.add_subplot(1,1,1)
+plt.scatter(sim_slips[0], sim_slips[1])
+ax1 = fig.add_subplot(1,1,1)
+plt.scatter(cad_slips[0], cad_slips[1])
+
+plt.show()
 
     # # old plots, to use just copy paste into process_rosbag function
     # ax2 = fig.add_subplot(3,3,3)

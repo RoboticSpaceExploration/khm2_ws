@@ -5,8 +5,10 @@ import roslaunch
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float32
 from sensor_msgs.msg import JointState
+from rosgraph_msgs.msg import Clock
 import json
 import os
+import math
 
 # GLOBAL STATE
 rospack = rospkg.RosPack()
@@ -26,6 +28,9 @@ already_reached_steady_state = False
 steady_state_time = rospy.Publisher("/steady_state_time", Float32, queue_size=10, latch=True)
 joint_state_time = 0
 done_running_trial = False
+start_time = math.inf # in nanoseconds
+time_elapsed = 0
+start_recording_flag = True
 
 # =================== START ROSLAUNCH SETUP =================
 file_name = f"sim_{angle}DEG"
@@ -45,23 +50,41 @@ def shutdown_node(event):
     global done_running_trial
     done_running_trial = True
 
-def steady_state_timer_callback(timerEvent):
+def gazebo_clock_callback(msg):
+    global start_time
+    global time_elapsed
+    global time
+    global done_running_trial
+    global start_recording_flag
+    if already_reached_steady_state:
+        if start_recording_flag:
+            start_time = msg.clock
+            start_recording_flag = False
+        else:
+            time_elapsed = msg.clock - start_time
+            if time_elapsed.to_sec() > time:
+                done_running_trial = True
+            
+
+def mark_trial_start():
+    global already_reached_steady_state
     steady_state_time.publish(joint_state_time)
+    already_reached_steady_state = True
+
 
 def joint_states_callback(msg):
     global already_reached_steady_state
-    joint_state_time = msg.header.stamp.to_sec()
     if not already_reached_steady_state:
         if msg.velocity[0] > speed * 0.95 and msg.velocity[1] > speed * 0.95 and msg.velocity[2] > speed * 0.95 and msg.velocity[3] > speed * 0.95:
             rospy.loginfo("Reached steady state")
             rospy.Timer(rospy.Duration(secs=time), shutdown_node) # start timer from steady state
-            already_reached_steady_state = True
-            rospy.Timer(rospy.Duration(secs=0.3), steady_state_timer_callback, oneshot=True)
+            mark_trial_start()
 
 if __name__ == "__main__":
     rospy.init_node('run_trial_node')
 
     joint_states_sub = rospy.Subscriber("/joint_states", JointState, joint_states_callback)
+    gazebo_clock_sub = rospy.Subscriber("/clock", Clock, gazebo_clock_callback, queue_size=1000)
     cmd_vel_pub = rospy.Publisher("/robot1_velocity_controller/cmd_vel", Twist, queue_size=100)
 
     rospy.loginfo("Starting trial...")
